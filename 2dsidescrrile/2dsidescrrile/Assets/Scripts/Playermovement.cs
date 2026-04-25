@@ -196,7 +196,6 @@ public class PlayerController2D : MonoBehaviour
             StartCoroutine(DaggerAttack());
         }
 
-        // JUMP ANIMATION
         animator.SetBool("Jumping", !IsGrounded());
 
         bool grounded = IsGrounded();
@@ -344,8 +343,6 @@ public class PlayerController2D : MonoBehaviour
         if (isDead || isInvincible) return;
 
         currentHealth -= damage;
-
-        HitStop.Instance.Trigger(hitStopDuration);
 
         if (currentHealth <= 0)
             Die();

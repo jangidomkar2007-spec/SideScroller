@@ -5,7 +5,7 @@ public class PogoStrike : MonoBehaviour
 {
     [Header("Pogo Settings")]
     [SerializeField] private float pogoBounceForce = 12f;
-    [SerializeField] private int pogoDamage = 25; // ✅ FIXED (int instead of float)
+    [SerializeField] private int pogoDamage = 25;
     [SerializeField] private float pogoCooldown = 0.3f;
     [SerializeField] private LayerMask enemyLayer;
 
@@ -40,7 +40,6 @@ public class PogoStrike : MonoBehaviour
             audioSource.playOnAwake = false;
         }
 
-        // Auto create attack point
         if (attackPoint == null)
         {
             GameObject obj = new GameObject("PogoAttackPoint");
@@ -54,7 +53,7 @@ public class PogoStrike : MonoBehaviour
     {
         if (!canPogo)
         {
-            cooldownTimer -= Time.deltaTime;
+            cooldownTimer -= Time.unscaledDeltaTime;
             if (cooldownTimer <= 0)
                 canPogo = true;
         }
@@ -82,10 +81,10 @@ public class PogoStrike : MonoBehaviour
             canPogo = false;
             cooldownTimer = pogoCooldown;
 
-            // 🔥 Bounce player
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, pogoBounceForce);
 
-            // 💥 Damage enemies (CLEAN METHOD)
+            StartCoroutine(PogoFlash());
+
             foreach (Collider2D enemy in hitEnemies)
             {
                 enemy.SendMessage("TakeDamage", pogoDamage, SendMessageOptions.DontRequireReceiver);
@@ -97,8 +96,6 @@ public class PogoStrike : MonoBehaviour
                 }
             }
 
-            // ✨ Effects
-            StartCoroutine(PogoFlash());
             SpawnPogoEffect();
             PlayPogoSound();
         }
@@ -112,14 +109,17 @@ public class PogoStrike : MonoBehaviour
 
     IEnumerator PogoFlash()
     {
-        if (spriteRenderer == null) yield break;
+        if (pogoEffectPrefab == null) yield break;
 
-        Color original = spriteRenderer.color;
-        spriteRenderer.color = pogoFlashColor;
+        GameObject flash = Instantiate(pogoEffectPrefab, attackPoint.position, Quaternion.identity);
 
-        yield return new WaitForSeconds(flashDuration);
+        SpriteRenderer flashRenderer = flash.GetComponent<SpriteRenderer>();
+        if (flashRenderer != null)
+            flashRenderer.color = pogoFlashColor;
 
-        spriteRenderer.color = original;
+        yield return new WaitForSecondsRealtime(flashDuration);
+
+        Destroy(flash);
     }
 
     void SpawnPogoEffect()

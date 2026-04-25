@@ -12,22 +12,28 @@ public class EnemyHealth : MonoBehaviour
     [Header("Hit Stop")]
     public float hitStopIntensity = 0.06f;
 
-
     public GameObject hitParticle;
+
     void Start()
     {
         currentHealth = maxHealth;
     }
 
-    
     public void TakeDamage(int damage)
     {
         currentHealth -= damage;
-        HitStop.Instance.Trigger(hitStopIntensity);
+
+        if (HitStop.Instance != null)
+        {
+            HitStop.Instance.Trigger(hitStopIntensity);
+        }
+
         Vector3 pos = transform.position;
 
-        Instantiate(hitParticle, pos, Quaternion.identity);         
-
+        if (hitParticle != null)
+        {
+            Instantiate(hitParticle, pos, Quaternion.identity);
+        }
 
         Debug.Log(gameObject.name + " took damage: " + damage +
                   " | Health left: " + currentHealth);
@@ -40,8 +46,6 @@ public class EnemyHealth : MonoBehaviour
 
     void Die()
     {
-       
-
         Debug.Log(gameObject.name + " died");
 
         Destroy(gameObject, destroyDelay);
