@@ -51,7 +51,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 100
+  spritePixelsToUnits: 300
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -103,13 +103,13 @@ TextureImporter:
       name: Floating_Plat_0
       rect:
         serializedVersion: 2
-        x: 1805
-        y: 712
-        width: 831
-        height: 776
+        x: 928
+        y: 555
+        width: 2140
+        height: 927
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
-      border: {x: 404, y: 84, z: 202, w: 490}
+      border: {x: 0, y: 54, z: 0, w: 482}
       customData: 
       outline: []
       physicsShape: []
@@ -117,28 +117,6 @@ TextureImporter:
       bones: []
       spriteID: e4369165137f427b0800000000000000
       internalID: -5249799474337193138
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Floating_Plat_1
-      rect:
-        serializedVersion: 2
-        x: 896
-        y: 938
-        width: 205
-        height: 69
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 8ecebe099c5a71a4a858fa1cd46c3eac
-      internalID: -1038955882
       vertices: []
       indices: 
       edges: []
