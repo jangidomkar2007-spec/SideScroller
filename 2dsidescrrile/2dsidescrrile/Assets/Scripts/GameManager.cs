@@ -3,38 +3,43 @@ using UnityEngine.SceneManagement;
 
 public class PauseMenu : MonoBehaviour
 {
-    public GameObject pauseMenuUI;
+    public GameObject pausePanel; // Assign Pause UI Panel here
+    private bool isPaused = false;
 
-    bool isPaused = false;
+    void Start()
+    {
+        pausePanel.SetActive(false); // Hide at start
+    }
 
     void Update()
     {
+        // Press ESC to toggle pause
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             if (isPaused)
-                Resume();
+                ResumeGame();
             else
-                Pause();
+                PauseGame();
         }
     }
 
-    public void Resume()
+    public void ResumeGame()
     {
-        pauseMenuUI.SetActive(false);
-        Time.timeScale = 1f;
+        pausePanel.SetActive(false);
+        Time.timeScale = 1f; // Resume time
         isPaused = false;
     }
 
-    void Pause()
+    public void PauseGame()
     {
-        pauseMenuUI.SetActive(true);
-        Time.timeScale = 0f;
+        pausePanel.SetActive(true);
+        Time.timeScale = 0f; // Freeze game
         isPaused = true;
     }
 
-    public void QuitGame()
+    public void MainMenu()
     {
-        Time.timeScale = 1f;
-        SceneManager.LoadScene(0); // main menu scene
+        Time.timeScale = 1f; // Important before loading scene
+        SceneManager.LoadScene("Main Menu"); // Change to your menu scene name
     }
 }
