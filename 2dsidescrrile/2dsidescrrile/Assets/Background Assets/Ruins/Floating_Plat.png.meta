@@ -103,9 +103,9 @@ TextureImporter:
       name: Floating_Plat_0
       rect:
         serializedVersion: 2
-        x: 928
+        x: 909
         y: 555
-        width: 2140
+        width: 2168
         height: 927
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
@@ -117,6 +117,116 @@ TextureImporter:
       bones: []
       spriteID: e4369165137f427b0800000000000000
       internalID: -5249799474337193138
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Floating_Plat_1
+      rect:
+        serializedVersion: 2
+        x: 2621
+        y: 1040
+        width: 442
+        height: 419
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5839507a96eb1e047aa425aad76540af
+      internalID: -1038955882
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Floating_Plat_2
+      rect:
+        serializedVersion: 2
+        x: 1401
+        y: 1042
+        width: 423
+        height: 415
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: fd08b0094710c954eb34a28ba3ae5a20
+      internalID: -1908688325
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Floating_Plat_3
+      rect:
+        serializedVersion: 2
+        x: 913
+        y: 1042
+        width: 483
+        height: 412
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 00d3775bdeec8b0468b17145b12d2020
+      internalID: 1793865304
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Floating_Plat_4
+      rect:
+        serializedVersion: 2
+        x: 1824
+        y: 1042
+        width: 415
+        height: 410
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: cb98742083c207b4aaad61dcb7a372e6
+      internalID: -1967852723
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Floating_Plat_5
+      rect:
+        serializedVersion: 2
+        x: 2248
+        y: 1044
+        width: 373
+        height: 408
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 73c3e28239d35794bad1a1a3347fbbd8
+      internalID: 1551518964
       vertices: []
       indices: 
       edges: []
@@ -137,6 +247,10 @@ TextureImporter:
     nameFileIdTable:
       Floating_Plat_0: -5249799474337193138
       Floating_Plat_1: -1038955882
+      Floating_Plat_2: -1908688325
+      Floating_Plat_3: 1793865304
+      Floating_Plat_4: -1967852723
+      Floating_Plat_5: 1551518964
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
