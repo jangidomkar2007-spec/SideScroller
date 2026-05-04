@@ -13109,17 +13109,6 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 256
   attackPoint: {fileID: 1935388947}
-<<<<<<< Updated upstream
-  attackRadius: 1.85
-  pogoEffectPrefab: {fileID: 0}
-  pogoHitColor: {r: 0, g: 1, b: 1, a: 1}
-  effectLifetime: 1
-=======
-  attackRadius: 1.37
-  pogoEffectPrefab: {fileID: 2282438384830233661, guid: 7697a49ea05824642b45a2fab61c81c4, type: 3}
-  pogoHitColor: {r: 0, g: 1, b: 1, a: 1}
-  effectLifetime: 0.5
->>>>>>> Stashed changes
   pogoSound: {fileID: 0}
 --- !u!1 &1868943199
 GameObject:
