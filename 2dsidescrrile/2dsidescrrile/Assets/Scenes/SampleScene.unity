@@ -8615,7 +8615,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &569766578
 RectTransform:
   m_ObjectHideFlags: 0
@@ -13109,6 +13109,10 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 256
   attackPoint: {fileID: 1935388947}
+  attackRadius: 0.8
+  pogoEffectPrefab: {fileID: 0}
+  pogoHitColor: {r: 0, g: 1, b: 1, a: 1}
+  effectLifetime: 0.5
   pogoSound: {fileID: 0}
 --- !u!1 &1868943199
 GameObject:

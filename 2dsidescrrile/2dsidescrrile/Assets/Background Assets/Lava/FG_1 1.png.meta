@@ -103,9 +103,9 @@ TextureImporter:
       name: FG_1_0
       rect:
         serializedVersion: 2
-        x: 1334
+        x: 1336
         y: 480
-        width: 691
+        width: 443
         height: 1520
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
