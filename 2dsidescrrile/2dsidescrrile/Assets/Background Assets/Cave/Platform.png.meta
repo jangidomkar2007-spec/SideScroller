@@ -103,13 +103,13 @@ TextureImporter:
       name: Platform_0
       rect:
         serializedVersion: 2
-        x: 4
-        y: 4
+        x: 47
+        y: 0
         width: 1153
         height: 596
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
-      border: {x: 529, y: 175, z: 309, w: 210}
+      border: {x: 529, y: 175, z: 309, w: 198}
       customData: 
       outline: []
       physicsShape: []
@@ -143,6 +143,94 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
+    - serializedVersion: 2
+      name: Platform_2
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 387
+        width: 1200
+        height: 213
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8880d2421b6e50e479cd6c1e815e59e9
+      internalID: -2081250958
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Platform_3
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 404
+        width: 1167
+        height: 196
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 55ae640e7859a3f439cd6deaa2b4777d
+      internalID: 414865859
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Platform_4
+      rect:
+        serializedVersion: 2
+        x: 35
+        y: 437
+        width: 1111
+        height: 148
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 804cdb58fc380e54a920aff8bb544bbb
+      internalID: 378929366
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Platform_5
+      rect:
+        serializedVersion: 2
+        x: 593
+        y: 455
+        width: 193
+        height: 83
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 135625f55f7a62444b5f49c3a5db5006
+      internalID: -2058709386
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline: []
     customData: 
     physicsShape: []
@@ -159,6 +247,10 @@ TextureImporter:
     nameFileIdTable:
       Platform_0: 2695397407002535339
       Platform_1: 442606060
+      Platform_2: -2081250958
+      Platform_3: 414865859
+      Platform_4: 378929366
+      Platform_5: -2058709386
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

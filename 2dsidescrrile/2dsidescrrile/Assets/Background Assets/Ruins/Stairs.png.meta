@@ -147,9 +147,9 @@ TextureImporter:
       name: Stairs_2
       rect:
         serializedVersion: 2
-        x: 2063
+        x: 2080
         y: 697
-        width: 1019
+        width: 788
         height: 460
       alignment: 0
       pivot: {x: 0.5, y: 0.5}

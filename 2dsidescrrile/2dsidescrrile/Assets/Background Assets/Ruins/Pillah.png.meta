@@ -130,7 +130,7 @@ TextureImporter:
         width: 984
         height: 395
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -139,6 +139,28 @@ TextureImporter:
       bones: []
       spriteID: 99a5534d038d2414faaf29424dbae4bc
       internalID: -767118958
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Pillah_2
+      rect:
+        serializedVersion: 2
+        x: 1508
+        y: 384
+        width: 835
+        height: 1616
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: dcf43b42527635845b82a7516e14deb4
+      internalID: 1082998195
       vertices: []
       indices: 
       edges: []
@@ -159,6 +181,7 @@ TextureImporter:
     nameFileIdTable:
       Pillah_0: -3770176379924215892
       Pillah_1: -767118958
+      Pillah_2: 1082998195
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
