@@ -165,6 +165,28 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
+    - serializedVersion: 2
+      name: Stairs_3
+      rect:
+        serializedVersion: 2
+        x: 2327
+        y: 751
+        width: 599
+        height: 406
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 326, y: 88, z: 227, w: 269}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e967551d05bae1147a9efea0fdd5f35c
+      internalID: -605365254
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline: []
     customData: 
     physicsShape: []
@@ -182,6 +204,7 @@ TextureImporter:
       Stairs_0: -2660968328804394481
       Stairs_1: 369390160
       Stairs_2: -740972130
+      Stairs_3: -605365254
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
