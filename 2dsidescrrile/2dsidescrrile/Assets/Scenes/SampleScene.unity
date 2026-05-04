@@ -7259,7 +7259,7 @@ Transform:
   m_GameObject: {fileID: 412381534}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: 0.00034529547, w: -0.99999994}
-  m_LocalPosition: {x: -50.2751, y: -59.149967, z: -10}
+  m_LocalPosition: {x: -50.29229, y: -59.149952, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -8133,8 +8133,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 36.51
-  m_fontSizeBase: 36.51
+  m_fontSize: 30
+  m_fontSizeBase: 30
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -8319,7 +8319,7 @@ Transform:
   m_GameObject: {fileID: 519420028}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: 0.00034529547, w: -0.99999994}
-  m_LocalPosition: {x: -50.2751, y: -59.149967, z: -10}
+  m_LocalPosition: {x: -50.29229, y: -59.149952, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -8615,7 +8615,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &569766578
 RectTransform:
   m_ObjectHideFlags: 0
@@ -10878,8 +10878,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 36
-  m_fontSizeBase: 36
+  m_fontSize: 30
+  m_fontSizeBase: 30
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -13109,10 +13109,17 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 256
   attackPoint: {fileID: 1935388947}
+<<<<<<< Updated upstream
   attackRadius: 1.85
   pogoEffectPrefab: {fileID: 0}
   pogoHitColor: {r: 0, g: 1, b: 1, a: 1}
   effectLifetime: 1
+=======
+  attackRadius: 1.37
+  pogoEffectPrefab: {fileID: 2282438384830233661, guid: 7697a49ea05824642b45a2fab61c81c4, type: 3}
+  pogoHitColor: {r: 0, g: 1, b: 1, a: 1}
+  effectLifetime: 0.5
+>>>>>>> Stashed changes
   pogoSound: {fileID: 0}
 --- !u!1 &1868943199
 GameObject:
