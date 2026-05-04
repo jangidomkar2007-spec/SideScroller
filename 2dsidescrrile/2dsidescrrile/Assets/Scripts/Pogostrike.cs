@@ -15,14 +15,14 @@ public class PogoStrike : MonoBehaviour
 
     [Header("Visual Effects")]
     [SerializeField] private GameObject pogoEffectPrefab;
-    [SerializeField] private Color pogoFlashColor = Color.cyan;
-    [SerializeField] private float flashDuration = 0.1f;
+    [SerializeField] private Color pogoHitColor = Color.cyan;
+    [SerializeField] private float effectLifetime = 0.5f;
 
     [Header("Audio")]
     [SerializeField] private AudioClip pogoSound;
 
+    private PlayerController2D playerController;
     private Rigidbody2D rb;
-    private SpriteRenderer spriteRenderer;
     private AudioSource audioSource;
 
     private bool canPogo = true;
@@ -30,8 +30,8 @@ public class PogoStrike : MonoBehaviour
 
     void Start()
     {
+        playerController = GetComponent<PlayerController2D>();
         rb = GetComponent<Rigidbody2D>();
-        spriteRenderer = GetComponent<SpriteRenderer>();
 
         audioSource = GetComponent<AudioSource>();
         if (audioSource == null && pogoSound != null)
@@ -62,7 +62,7 @@ public class PogoStrike : MonoBehaviour
             (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow)) &&
             (Input.GetKeyDown(KeyCode.Space) || Input.GetMouseButtonDown(0));
 
-        if (pogoInput && canPogo && !IsGrounded())
+        if (pogoInput && canPogo && !IsGrounded() && !playerController.isDead)
         {
             PerformPogoStrike();
         }
@@ -83,7 +83,8 @@ public class PogoStrike : MonoBehaviour
 
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, pogoBounceForce);
 
-            StartCoroutine(PogoFlash());
+            SpawnPogoEffect();
+            PlayPogoSound();
 
             foreach (Collider2D enemy in hitEnemies)
             {
@@ -91,14 +92,37 @@ public class PogoStrike : MonoBehaviour
 
                 Rigidbody2D enemyRb = enemy.GetComponent<Rigidbody2D>();
                 if (enemyRb != null)
-                {
                     enemyRb.linearVelocity = new Vector2(0, 5f);
-                }
             }
-
-            SpawnPogoEffect();
-            PlayPogoSound();
         }
+    }
+
+    void SpawnPogoEffect()
+    {
+        if (pogoEffectPrefab == null) return;
+
+        GameObject effect = Instantiate(pogoEffectPrefab, attackPoint.position, Quaternion.identity);
+
+        // Apply blue color to every SpriteRenderer on the effect and its children
+        SpriteRenderer[] sprites = effect.GetComponentsInChildren<SpriteRenderer>();
+        foreach (SpriteRenderer sr in sprites)
+            sr.color = pogoHitColor;
+
+        // Apply blue color to every ParticleSystem on the effect and its children
+        ParticleSystem[] particles = effect.GetComponentsInChildren<ParticleSystem>();
+        foreach (ParticleSystem ps in particles)
+        {
+            var main = ps.main;
+            main.startColor = pogoHitColor;
+        }
+
+        Destroy(effect, effectLifetime);
+    }
+
+    void PlayPogoSound()
+    {
+        if (audioSource != null && pogoSound != null)
+            audioSource.PlayOneShot(pogoSound);
     }
 
     bool IsGrounded()
@@ -107,46 +131,13 @@ public class PogoStrike : MonoBehaviour
         return hit.collider != null && hit.collider.CompareTag("Ground");
     }
 
-    IEnumerator PogoFlash()
-    {
-        if (pogoEffectPrefab == null) yield break;
-
-        GameObject flash = Instantiate(pogoEffectPrefab, attackPoint.position, Quaternion.identity);
-
-        SpriteRenderer flashRenderer = flash.GetComponent<SpriteRenderer>();
-        if (flashRenderer != null)
-            flashRenderer.color = pogoFlashColor;
-
-        yield return new WaitForSecondsRealtime(flashDuration);
-
-        Destroy(flash);
-    }
-
-    void SpawnPogoEffect()
-    {
-        if (pogoEffectPrefab != null)
-        {
-            GameObject effect = Instantiate(pogoEffectPrefab, attackPoint.position, Quaternion.identity);
-            Destroy(effect, 0.5f);
-        }
-    }
-
-    void PlayPogoSound()
-    {
-        if (audioSource != null && pogoSound != null)
-        {
-            audioSource.PlayOneShot(pogoSound);
-        }
-    }
-
     void OnDrawGizmosSelected()
     {
         if (attackPoint != null)
         {
-            Gizmos.color = Color.green;
+            Gizmos.color = Color.cyan;
             Gizmos.DrawWireSphere(attackPoint.position, attackRadius);
         }
-
         Gizmos.color = Color.blue;
         Gizmos.DrawLine(transform.position, transform.position + Vector3.down * 0.2f);
     }

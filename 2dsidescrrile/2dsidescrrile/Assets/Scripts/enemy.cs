@@ -11,7 +11,6 @@ public class EnemyHealth : MonoBehaviour
 
     [Header("Hit Stop")]
     public float hitStopIntensity = 0.06f;
-
     public GameObject hitParticle;
 
     void Start()
@@ -19,35 +18,26 @@ public class EnemyHealth : MonoBehaviour
         currentHealth = maxHealth;
     }
 
+    // INTEGRATION: called by PogoStrike via SendMessage("TakeDamage", pogoDamage)
     public void TakeDamage(int damage)
     {
         currentHealth -= damage;
 
         if (HitStop.Instance != null)
-        {
             HitStop.Instance.Trigger(hitStopIntensity);
-        }
-
-        Vector3 pos = transform.position;
 
         if (hitParticle != null)
-        {
-            Instantiate(hitParticle, pos, Quaternion.identity);
-        }
+            Instantiate(hitParticle, transform.position, Quaternion.identity);
 
-        Debug.Log(gameObject.name + " took damage: " + damage +
-                  " | Health left: " + currentHealth);
+        Debug.Log(gameObject.name + " took damage: " + damage + " | Health left: " + currentHealth);
 
         if (currentHealth <= 0)
-        {
             Die();
-        }
     }
 
     void Die()
     {
         Debug.Log(gameObject.name + " died");
-
         Destroy(gameObject, destroyDelay);
     }
 }
