@@ -103,13 +103,13 @@ TextureImporter:
       name: Ground_0
       rect:
         serializedVersion: 2
-        x: 70
+        x: 56
         y: 0
         width: 4614
-        height: 1532
+        height: 1536
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
-      border: {x: 2450, y: 979, z: 1953, w: 38}
+      border: {x: 2450, y: 979, z: 1953, w: 421}
       customData: 
       outline: []
       physicsShape: []
