@@ -1,10 +1,16 @@
 fileFormatVersion: 2
-guid: 7e84f788349a3fb48b530bcacc3401ea
+guid: 436a05f12e49ec2499ea821d9e451486
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 2695397407002535339
-    second: Platform_0
+      213: -4853936086480428221
+    second: bgskeleton_0
+  - first:
+      213: -4520800260218100457
+    second: bgskeleton_1
+  - first:
+      213: -1153139489435859793
+    second: bgskeleton_2
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -100,133 +106,67 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Platform_0
+      name: bgskeleton_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 0
-        width: 1200
-        height: 596
+        x: 344
+        y: 519
+        width: 980
+        height: 1398
       alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 529, y: 175, z: 309, w: 198}
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: ba525ec29a9f76520800000000000000
-      internalID: 2695397407002535339
+      spriteID: 34362eab8da53acb0800000000000000
+      internalID: -4853936086480428221
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Platform_1
+      name: bgskeleton_1
       rect:
         serializedVersion: 2
-        x: 150
-        y: 141
-        width: 894
-        height: 257
+        x: 1289
+        y: 1166
+        width: 515
+        height: 1008
       alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 450, y: 42, z: 329, w: 75}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 6a9cede8be1a0ca46b4a22907e991452
-      internalID: 442606060
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Platform_2
-      rect:
-        serializedVersion: 2
-        x: 0
-        y: 387
-        width: 1200
-        height: 213
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: 8880d2421b6e50e479cd6c1e815e59e9
-      internalID: -2081250958
+      spriteID: 715e4359d14e241c0800000000000000
+      internalID: -4520800260218100457
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Platform_3
+      name: bgskeleton_2
       rect:
         serializedVersion: 2
-        x: 0
-        y: 404
-        width: 1167
-        height: 196
+        x: 1858
+        y: 1167
+        width: 2847
+        height: 2181
       alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: 55ae640e7859a3f439cd6deaa2b4777d
-      internalID: 414865859
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Platform_4
-      rect:
-        serializedVersion: 2
-        x: 35
-        y: 437
-        width: 1111
-        height: 148
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 804cdb58fc380e54a920aff8bb544bbb
-      internalID: 378929366
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Platform_5
-      rect:
-        serializedVersion: 2
-        x: 593
-        y: 455
-        width: 193
-        height: 83
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 135625f55f7a62444b5f49c3a5db5006
-      internalID: -2058709386
+      spriteID: fa443b37eb93fffe0800000000000000
+      internalID: -1153139489435859793
       vertices: []
       indices: 
       edges: []
@@ -235,7 +175,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 8a8aa2c06d0cdaf4dbc27cf37c6eaac0
+    spriteID: 
     internalID: 0
     vertices: []
     indices: 
@@ -245,12 +185,9 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Platform_0: 2695397407002535339
-      Platform_1: 442606060
-      Platform_2: -2081250958
-      Platform_3: 414865859
-      Platform_4: 378929366
-      Platform_5: -2058709386
+      bgskeleton_0: -4853936086480428221
+      bgskeleton_1: -4520800260218100457
+      bgskeleton_2: -1153139489435859793
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
