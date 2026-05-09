@@ -50,10 +50,11 @@ public class PlayerController2D : MonoBehaviour
 
     [Header("Attack")]
     public float attackCooldown = 0.2f;
-
+ 
     [Header("Slide")]
     public bool slideUnlocked = false;
 
+   
     public float slideForce = 14f;
     public float slideDuration = 0.35f;
     public float slideCooldown = 1f;
@@ -77,6 +78,9 @@ public class PlayerController2D : MonoBehaviour
 
     private bool wasGrounded;
     private bool isAttacking;
+
+   
+
     private bool facingRight = true;
 
     Animator animator;
@@ -205,11 +209,7 @@ public class PlayerController2D : MonoBehaviour
                 isDashing = false;
         }
 
-        // ATTACK ANIMATION
-        if (Input.GetMouseButtonDown(0) && !isAttacking)
-        {
-            StartCoroutine(Attack());
-        }
+        
 
         animator.SetBool("Jumping", !IsGrounded());
 
@@ -222,9 +222,25 @@ public class PlayerController2D : MonoBehaviour
             dustEffect.Play();
 
         wasGrounded = grounded;
-    }
+        // LEFT CLICK = NORMAL ATTACK
+        if (Input.GetMouseButtonDown(0) && !isAttacking)
+        {
+            StartCoroutine(Attack1());
+        }
 
-    void FixedUpdate()
+        // RIGHT CLICK = HEAVY ATTACK
+        if (Input.GetMouseButtonDown(1) && !isAttacking)
+        {
+            StartCoroutine(Attack2());
+        }
+
+    } 
+
+
+
+  
+
+        void FixedUpdate()
     {
         if (isDead) return;
 
@@ -258,13 +274,27 @@ public class PlayerController2D : MonoBehaviour
                 animator.SetBool("Walking", false);
             }
         }
+
     }
 
-    IEnumerator Attack()
+    IEnumerator Attack1()
     {
         isAttacking = true;
 
-        animator.SetTrigger("Attack");
+        animator.ResetTrigger("Attack2");
+        animator.SetTrigger("Attack1");
+
+        yield return new WaitForSeconds(attackCooldown);
+
+        isAttacking = false;
+    }
+
+    IEnumerator Attack2()
+    {
+        isAttacking = true;
+
+        animator.ResetTrigger("Attack1");
+        animator.SetTrigger("Attack2");
 
         yield return new WaitForSeconds(attackCooldown);
 
