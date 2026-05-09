@@ -44,6 +44,10 @@ public class PlayerController2D : MonoBehaviour
     [Header("Fall Detection")]
     public float fallLimitY = -10f;
 
+    [Header("Respawn")]
+    public Transform respawnPoint;
+    public float respawnDelay = 1.2f;
+
     [Header("Dual Daggers")]
     public GameObject rightDagger;
     public GameObject leftDagger;
@@ -59,8 +63,6 @@ public class PlayerController2D : MonoBehaviour
 
     private bool isSliding = false;
     private bool canSlide = true;
-
-    
 
     private BoxCollider2D box;
     private Vector2 originalSize;
@@ -95,15 +97,23 @@ public class PlayerController2D : MonoBehaviour
 
         box = GetComponent<BoxCollider2D>();
         originalSize = box.size;
+
         animator = GetComponent<Animator>();
+
+        if (respawnPoint == null)
+        {
+            GameObject spawn = new GameObject("SpawnPoint");
+            spawn.transform.position = transform.position;
+            respawnPoint = spawn.transform;
+        }
     }
 
     void Update()
     {
         if (slideUnlocked &&
-    Input.GetKeyDown(KeyCode.LeftControl) &&
-    canSlide &&
-    IsGrounded())
+            Input.GetKeyDown(KeyCode.LeftControl) &&
+            canSlide &&
+            IsGrounded())
         {
             StartCoroutine(Slide());
         }
@@ -160,7 +170,11 @@ public class PlayerController2D : MonoBehaviour
         {
             if (jumpTimer > 0)
             {
-                rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
+                rb.linearVelocity = new Vector2(
+                    rb.linearVelocity.x,
+                    jumpForce
+                );
+
                 jumpTimer -= Time.deltaTime;
             }
             else
@@ -179,8 +193,14 @@ public class PlayerController2D : MonoBehaviour
 
             StartCoroutine(DashInvincibility());
 
-            float dir = moveInput != 0 ? Mathf.Sign(moveInput) : transform.localScale.x;
-            rb.linearVelocity = new Vector2(dir * dashForce, rb.linearVelocity.y);
+            float dir = moveInput != 0
+                ? Mathf.Sign(moveInput)
+                : transform.localScale.x;
+
+            rb.linearVelocity = new Vector2(
+                dir * dashForce,
+                rb.linearVelocity.y
+            );
         }
 
         if (isDashing)
@@ -215,8 +235,14 @@ public class PlayerController2D : MonoBehaviour
 
         if (!isDashing && !isSliding)
         {
-            float speed = Input.GetKey(KeyCode.LeftShift) ? sprintSpeed : moveSpeed;
-            rb.linearVelocity = new Vector2(moveInput * speed, rb.linearVelocity.y);
+            float speed = Input.GetKey(KeyCode.LeftShift)
+                ? sprintSpeed
+                : moveSpeed;
+
+            rb.linearVelocity = new Vector2(
+                moveInput * speed,
+                rb.linearVelocity.y
+            );
 
             if (moveInput != 0 && IsGrounded())
             {
@@ -243,7 +269,10 @@ public class PlayerController2D : MonoBehaviour
     {
         if (isDead || amount <= 0) return;
 
-        currentHealth = Mathf.Min(currentHealth + amount, maxHealth);
+        currentHealth = Mathf.Min(
+            currentHealth + amount,
+            maxHealth
+        );
     }
 
     void OnTriggerEnter2D(Collider2D other)
@@ -251,7 +280,13 @@ public class PlayerController2D : MonoBehaviour
         if (other.CompareTag("HealthPickup"))
         {
             Heal(healthPickupAmount);
+
             Destroy(other.gameObject);
+        }
+
+        if (other.CompareTag("Checkpoint"))
+        {
+            respawnPoint = other.transform;
         }
     }
 
@@ -276,13 +311,21 @@ public class PlayerController2D : MonoBehaviour
     {
         isInvincible = true;
 
-        Physics2D.IgnoreLayerCollision(gameObject.layer, LayerMask.NameToLayer("Enemy"), true);
+        Physics2D.IgnoreLayerCollision(
+            gameObject.layer,
+            LayerMask.NameToLayer("Enemy"),
+            true
+        );
 
         yield return new WaitForSeconds(invincibilityTime);
 
         isInvincible = false;
 
-        Physics2D.IgnoreLayerCollision(gameObject.layer, LayerMask.NameToLayer("Enemy"), false);
+        Physics2D.IgnoreLayerCollision(
+            gameObject.layer,
+            LayerMask.NameToLayer("Enemy"),
+            false
+        );
     }
 
     public void ActivateSlideAbility(float duration)
@@ -330,12 +373,16 @@ public class PlayerController2D : MonoBehaviour
 
         canSlide = true;
     }
+
     void StartJump()
     {
         isJumping = true;
         jumpTimer = maxJumpTime;
 
-        rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
+        rb.linearVelocity = new Vector2(
+            rb.linearVelocity.x,
+            jumpForce
+        );
     }
 
     bool IsGrounded()
@@ -374,12 +421,23 @@ public class PlayerController2D : MonoBehaviour
         foreach (Collider2D col in colliders)
             col.enabled = false;
 
-        Invoke(nameof(ReloadScene), 1.2f);
+        Invoke(nameof(Respawn), respawnDelay);
     }
 
-    void ReloadScene()
+    void Respawn()
     {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        transform.position = respawnPoint.position;
+
+        currentHealth = maxHealth;
+
+        isDead = false;
+
+        rb.simulated = true;
+
+        spriteRenderer.enabled = true;
+
+        foreach (Collider2D col in colliders)
+            col.enabled = true;
     }
 
     void OnCollisionEnter2D(Collision2D collision)
@@ -413,7 +471,9 @@ public class PlayerController2D : MonoBehaviour
         facingRight = !facingRight;
 
         Vector3 scale = transform.localScale;
+
         scale.x *= -1;
+
         transform.localScale = scale;
 
         if (IsGrounded())
