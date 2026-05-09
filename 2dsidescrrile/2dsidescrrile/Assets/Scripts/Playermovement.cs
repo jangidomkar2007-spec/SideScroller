@@ -52,10 +52,15 @@ public class PlayerController2D : MonoBehaviour
 
     [Header("Slide")]
     public bool slideUnlocked = false;
-    public float slideDuration = 0.6f;
-    private float slideTimer;
+
+    public float slideForce = 14f;
+    public float slideDuration = 0.35f;
+    public float slideCooldown = 1f;
 
     private bool isSliding = false;
+    private bool canSlide = true;
+
+    
 
     private BoxCollider2D box;
     private Vector2 originalSize;
@@ -95,17 +100,12 @@ public class PlayerController2D : MonoBehaviour
 
     void Update()
     {
-        if (slideUnlocked && Input.GetKeyDown(KeyCode.LeftControl) && !isSliding)
+        if (slideUnlocked &&
+    Input.GetKeyDown(KeyCode.LeftControl) &&
+    canSlide &&
+    IsGrounded())
         {
-            StartSlide();
-        }
-
-        if (isSliding)
-        {
-            slideTimer -= Time.deltaTime;
-
-            if (slideTimer <= 0)
-                StopSlide();
+            StartCoroutine(Slide());
         }
 
         if (isDead) return;
@@ -213,7 +213,7 @@ public class PlayerController2D : MonoBehaviour
     {
         if (isDead) return;
 
-        if (!isDashing)
+        if (!isDashing && !isSliding)
         {
             float speed = Input.GetKey(KeyCode.LeftShift) ? sprintSpeed : moveSpeed;
             rb.linearVelocity = new Vector2(moveInput * speed, rb.linearVelocity.y);
@@ -299,25 +299,37 @@ public class PlayerController2D : MonoBehaviour
         slideUnlocked = false;
     }
 
-    void StartSlide()
+    IEnumerator Slide()
     {
+        canSlide = false;
         isSliding = true;
-        slideTimer = slideDuration;
 
-        box.size = new Vector2(originalSize.x, originalSize.y / 2);
+        animator.SetBool("Sliding", true);
 
-        transform.rotation = Quaternion.Euler(0, 0, 35);
-    }
+        box.size = new Vector2(
+            originalSize.x,
+            originalSize.y / 2
+        );
 
-    void StopSlide()
-    {
-        isSliding = false;
+        float direction = facingRight ? 1f : -1f;
+
+        rb.linearVelocity = new Vector2(
+            direction * slideForce,
+            rb.linearVelocity.y
+        );
+
+        yield return new WaitForSeconds(slideDuration);
 
         box.size = originalSize;
 
-        transform.rotation = Quaternion.Euler(0, 0, 0);
-    }
+        isSliding = false;
 
+        animator.SetBool("Sliding", false);
+
+        yield return new WaitForSeconds(slideCooldown);
+
+        canSlide = true;
+    }
     void StartJump()
     {
         isJumping = true;
