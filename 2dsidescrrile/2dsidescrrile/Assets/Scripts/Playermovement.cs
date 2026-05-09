@@ -48,11 +48,8 @@ public class PlayerController2D : MonoBehaviour
     public Transform respawnPoint;
     public float respawnDelay = 1.2f;
 
-    [Header("Dual Daggers")]
-    public GameObject rightDagger;
-    public GameObject leftDagger;
-    public float attackDuration = 0.2f;
-    public float attackCooldown = 0.1f;
+    [Header("Attack")]
+    public float attackCooldown = 0.2f;
 
     [Header("Slide")]
     public bool slideUnlocked = false;
@@ -91,9 +88,6 @@ public class PlayerController2D : MonoBehaviour
         colliders = GetComponents<Collider2D>();
 
         currentHealth = maxHealth;
-
-        rightDagger.SetActive(false);
-        leftDagger.SetActive(false);
 
         box = GetComponent<BoxCollider2D>();
         originalSize = box.size;
@@ -211,9 +205,10 @@ public class PlayerController2D : MonoBehaviour
                 isDashing = false;
         }
 
+        // ATTACK ANIMATION
         if (Input.GetMouseButtonDown(0) && !isAttacking)
         {
-            StartCoroutine(DaggerAttack());
+            StartCoroutine(Attack());
         }
 
         animator.SetBool("Jumping", !IsGrounded());
@@ -265,94 +260,23 @@ public class PlayerController2D : MonoBehaviour
         }
     }
 
-    public void Heal(int amount)
-    {
-        if (isDead || amount <= 0) return;
-
-        currentHealth = Mathf.Min(
-            currentHealth + amount,
-            maxHealth
-        );
-    }
-
-    void OnTriggerEnter2D(Collider2D other)
-    {
-        if (other.CompareTag("HealthPickup"))
-        {
-            Heal(healthPickupAmount);
-
-            Destroy(other.gameObject);
-        }
-
-        if (other.CompareTag("Checkpoint"))
-        {
-            respawnPoint = other.transform;
-        }
-    }
-
-    IEnumerator DaggerAttack()
+    IEnumerator Attack()
     {
         isAttacking = true;
 
-        rightDagger.SetActive(true);
-        leftDagger.SetActive(true);
-
-        yield return new WaitForSeconds(attackDuration);
-
-        rightDagger.SetActive(false);
-        leftDagger.SetActive(false);
+        animator.SetTrigger("Attack");
 
         yield return new WaitForSeconds(attackCooldown);
 
         isAttacking = false;
     }
 
-    IEnumerator DashInvincibility()
-    {
-        isInvincible = true;
-
-        Physics2D.IgnoreLayerCollision(
-            gameObject.layer,
-            LayerMask.NameToLayer("Enemy"),
-            true
-        );
-
-        yield return new WaitForSeconds(invincibilityTime);
-
-        isInvincible = false;
-
-        Physics2D.IgnoreLayerCollision(
-            gameObject.layer,
-            LayerMask.NameToLayer("Enemy"),
-            false
-        );
-    }
-
-    public void ActivateSlideAbility(float duration)
-    {
-        StartCoroutine(SlideAbilityTimer(duration));
-    }
-
-    IEnumerator SlideAbilityTimer(float duration)
-    {
-        slideUnlocked = true;
-
-        yield return new WaitForSeconds(duration);
-
-        slideUnlocked = false;
-    }
-
     IEnumerator Slide()
     {
-        canSlide = false;
         isSliding = true;
+        canSlide = false;
 
         animator.SetBool("Sliding", true);
-
-        box.size = new Vector2(
-            originalSize.x,
-            originalSize.y / 2
-        );
 
         float direction = facingRight ? 1f : -1f;
 
@@ -362,8 +286,6 @@ public class PlayerController2D : MonoBehaviour
         );
 
         yield return new WaitForSeconds(slideDuration);
-
-        box.size = originalSize;
 
         isSliding = false;
 
@@ -385,26 +307,59 @@ public class PlayerController2D : MonoBehaviour
         );
     }
 
-    bool IsGrounded()
+    void Flip()
     {
-        return Physics2D.BoxCast(
+        facingRight = !facingRight;
+
+        Vector3 localScale = transform.localScale;
+        localScale.x *= -1;
+        transform.localScale = localScale;
+    }
+
+    public bool IsGrounded()
+    {
+        RaycastHit2D hit = Physics2D.BoxCast(
             transform.position,
             boxSize,
-            0f,
+            0,
             Vector2.down,
             castDistance,
             groundLayer
         );
+
+        return hit.collider != null;
     }
 
-    public void TakeDamage(int damage, float hitStopDuration = 0.06f)
+    IEnumerator DashInvincibility()
     {
-        if (isDead || isInvincible) return;
+        isInvincible = true;
+
+        yield return new WaitForSeconds(invincibilityTime);
+
+        isInvincible = false;
+    }
+
+    public void Heal(int amount)
+    {
+        if (isDead || amount <= 0) return;
+
+        currentHealth = Mathf.Min(
+            currentHealth + amount,
+            maxHealth
+        );
+    }
+
+    public void TakeDamage(int damage)
+    {
+        if (isInvincible || isDead)
+            return;
 
         currentHealth -= damage;
 
         if (currentHealth <= 0)
+        {
             Die();
+        }
     }
 
     void Die()
@@ -413,52 +368,33 @@ public class PlayerController2D : MonoBehaviour
 
         isDead = true;
 
-        rb.linearVelocity = Vector2.zero;
-        rb.simulated = false;
+        animator.SetTrigger("Death");
 
-        spriteRenderer.enabled = false;
-
-        foreach (Collider2D col in colliders)
-            col.enabled = false;
-
-        Invoke(nameof(Respawn), respawnDelay);
+        StartCoroutine(Respawn());
     }
 
-    void Respawn()
+    IEnumerator Respawn()
     {
+        rb.linearVelocity = Vector2.zero;
+
+        foreach (Collider2D col in colliders)
+        {
+            col.enabled = false;
+        }
+
+        yield return new WaitForSeconds(respawnDelay);
+
         transform.position = respawnPoint.position;
 
         currentHealth = maxHealth;
-
         isDead = false;
 
-        rb.simulated = true;
-
-        spriteRenderer.enabled = true;
-
         foreach (Collider2D col in colliders)
-            col.enabled = true;
-    }
-
-    void OnCollisionEnter2D(Collision2D collision)
-    {
-        if (collision.gameObject.CompareTag("Enemy") ||
-            collision.gameObject.CompareTag("Obstacle"))
         {
-            TakeDamage(20);
+            col.enabled = true;
         }
     }
-
-    void OnDrawGizmos()
-    {
-        Gizmos.color = Color.green;
-
-        Gizmos.DrawWireCube(
-            transform.position + Vector3.down * castDistance,
-            boxSize
-        );
-    }
-
+    // DOUBLE JUMP UNLOCK
     public void UnlockDoubleJump()
     {
         canDoubleJump = true;
@@ -466,17 +402,23 @@ public class PlayerController2D : MonoBehaviour
         doubleJumpTimer = doubleJumpDuration;
     }
 
-    void Flip()
+    // SLIDE ABILITY UNLOCK
+    public void ActivateSlideAbility(float value)
     {
-        facingRight = !facingRight;
+        slideUnlocked = true;
+    }
+    public void SetCheckpoint(Vector2 checkpointPosition)
+    {
+        respawnPoint.position = checkpointPosition;
+    }
 
-        Vector3 scale = transform.localScale;
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.red;
 
-        scale.x *= -1;
-
-        transform.localScale = scale;
-
-        if (IsGrounded())
-            dustEffect.Play();
+        Gizmos.DrawWireCube(
+            transform.position + Vector3.down * castDistance,
+            boxSize
+        );
     }
 }
