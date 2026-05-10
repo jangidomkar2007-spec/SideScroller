@@ -1,5 +1,6 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.UI;
 
 public class EnemyHealth : MonoBehaviour
 {
@@ -41,6 +42,18 @@ public class EnemyHealth : MonoBehaviour
     private Animator animator;
     private Rigidbody2D rb;
 
+    // ===================================
+    // HEALTH BAR
+    // ===================================
+    [Header("Health Bar")]
+    public Vector3 healthBarOffset = new Vector3(0f, 1.2f, 0f);
+    public float healthBarWidth = 1f;
+    public float healthBarHeight = 0.12f;
+
+    private GameObject healthBarRoot;
+    private Image healthBarFill;
+    private Canvas healthBarCanvas;
+
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -60,6 +73,82 @@ public class EnemyHealth : MonoBehaviour
         {
             targetPoint = pointB;
         }
+
+        CreateHealthBar();
+    }
+
+    // ===================================
+    // HEALTH BAR SETUP
+    // ===================================
+    void CreateHealthBar()
+    {
+        // Root object positioned above enemy
+        healthBarRoot = new GameObject("HealthBar");
+        healthBarRoot.transform.SetParent(transform);
+        healthBarRoot.transform.localPosition = healthBarOffset;
+        healthBarRoot.transform.localRotation = Quaternion.identity;
+        healthBarRoot.transform.localScale = Vector3.one;
+
+        // World-space canvas so it sits in the scene
+        healthBarCanvas = healthBarRoot.AddComponent<Canvas>();
+        healthBarCanvas.renderMode = RenderMode.WorldSpace;
+        healthBarCanvas.sortingLayerName = "Default";
+        healthBarCanvas.sortingOrder = 10;
+
+        RectTransform canvasRect =
+            healthBarRoot.GetComponent<RectTransform>();
+        canvasRect.sizeDelta = new Vector2(healthBarWidth, healthBarHeight);
+
+        // Background (dark)
+        GameObject bg = new GameObject("Background");
+        bg.transform.SetParent(healthBarRoot.transform, false);
+
+        Image bgImage = bg.AddComponent<Image>();
+        bgImage.color = new Color(0.15f, 0.15f, 0.15f, 0.85f);
+
+        RectTransform bgRect = bg.GetComponent<RectTransform>();
+        bgRect.anchorMin = Vector2.zero;
+        bgRect.anchorMax = Vector2.one;
+        bgRect.offsetMin = Vector2.zero;
+        bgRect.offsetMax = Vector2.zero;
+
+        // Fill (green → red as health drops)
+        GameObject fill = new GameObject("Fill");
+        fill.transform.SetParent(healthBarRoot.transform, false);
+
+        healthBarFill = fill.AddComponent<Image>();
+        healthBarFill.color = Color.green;
+        healthBarFill.type = Image.Type.Filled;
+        healthBarFill.fillMethod = Image.FillMethod.Horizontal;
+        healthBarFill.fillOrigin = 0; // fills left → right
+        healthBarFill.fillAmount = 1f;
+
+        RectTransform fillRect = fill.GetComponent<RectTransform>();
+        fillRect.anchorMin = Vector2.zero;
+        fillRect.anchorMax = Vector2.one;
+        fillRect.offsetMin = Vector2.zero;
+        fillRect.offsetMax = Vector2.zero;
+
+        // Hide bar at full health — shows on first hit
+        healthBarRoot.SetActive(false);
+    }
+
+    void UpdateHealthBar()
+    {
+        if (healthBarFill == null) return;
+
+        float fraction = (float)currentHealth / maxHealth;
+        healthBarFill.fillAmount = fraction;
+
+        // Green at full, red at empty
+        healthBarFill.color = Color.Lerp(Color.red, Color.green, fraction);
+
+        // Keep bar facing the camera so it's always readable
+        if (Camera.main != null)
+        {
+            healthBarRoot.transform.rotation =
+                Camera.main.transform.rotation;
+        }
     }
 
     void Update()
@@ -69,7 +158,9 @@ public class EnemyHealth : MonoBehaviour
 
         CheckPlayerDistance();
 
-        
+        // Keep health bar facing camera every frame
+        if (healthBarRoot != null && healthBarRoot.activeSelf)
+            UpdateHealthBar();
     }
 
     void FixedUpdate()
@@ -231,6 +322,13 @@ public class EnemyHealth : MonoBehaviour
             return;
 
         currentHealth -= damage;
+
+        // Show and update health bar on first hit
+        if (healthBarRoot != null)
+        {
+            healthBarRoot.SetActive(true);
+            UpdateHealthBar();
+        }
 
         if (HitStop.Instance != null)
         {
