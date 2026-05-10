@@ -50,7 +50,18 @@ public class PlayerController2D : MonoBehaviour
 
     [Header("Attack")]
     public float attackCooldown = 0.2f;
- 
+
+    public Transform attackPoint;
+    public float attackRange = 0.8f;
+    public int attackDamage = 25;
+
+    public int heavyAttackDamage = 50;
+    public float heavyAttackCooldown = 2f;
+    public LayerMask enemyLayers;
+
+    [Header("Effects")]
+    public GameObject hitEffectPrefab;
+    public GameObject healEffectPrefab;
 
 
     [Header("Pogo Strike")]
@@ -99,9 +110,7 @@ public class PlayerController2D : MonoBehaviour
 
     private bool wasGrounded;
     private bool isAttacking;
-
-   
-
+    private bool canHeavyAttack = true;
     private bool facingRight = true;
 
     Animator animator;
@@ -250,7 +259,6 @@ public class PlayerController2D : MonoBehaviour
                 isDashing = false;
         }
 
-
         bool grounded = IsGrounded();
 
         // JUMP START
@@ -286,8 +294,9 @@ public class PlayerController2D : MonoBehaviour
         }
 
         wasGrounded = grounded;
-
         // POGO COOLDOWN
+
+
         if (!canPogo)
         {
             pogoCooldownTimer -= Time.deltaTime;
@@ -313,24 +322,27 @@ public class PlayerController2D : MonoBehaviour
         {
             PerformPogoStrike();
         }
-
+        // LEFT CLICK = NORMAL ATTACK
         if (Input.GetMouseButtonDown(0) &&
-      !isAttacking &&
-      !isPogoStriking)
+            !isAttacking &&
+            !isPogoStriking)
         {
             StartCoroutine(Attack1());
         }
 
+        // RIGHT CLICK = HEAVY ATTACK
         if (Input.GetMouseButtonDown(1) &&
-            !isAttacking &&
-            !isPogoStriking)
+       !isAttacking &&
+       !isPogoStriking &&
+       canHeavyAttack)
         {
             StartCoroutine(Attack2());
         }
     }
 
-        void FixedUpdate()
+    void FixedUpdate()
     {
+      
         if (isDead) return;
 
         if (!isDashing && !isSliding)
@@ -410,6 +422,7 @@ public class PlayerController2D : MonoBehaviour
                         new Vector2(0, 5f);
                 }
             }
+        
         }
 
         StartCoroutine(ResetPogoState());
@@ -426,11 +439,17 @@ public class PlayerController2D : MonoBehaviour
     {
         if (pogoEffectPrefab == null) return;
 
+        // PLAYER FEET POSITION
+        Vector3 feetPosition = transform.position + new Vector3(0f, -1f, 0f);
+
         GameObject effect = Instantiate(
             pogoEffectPrefab,
-            pogoAttackPoint.position,
-            pogoAttackPoint.rotation
+            feetPosition,
+            Quaternion.identity
         );
+
+        // MAKE EFFECT FOLLOW PLAYER
+        effect.transform.SetParent(transform);
 
         effect.transform.localScale = Vector3.one;
 
@@ -454,7 +473,6 @@ public class PlayerController2D : MonoBehaviour
 
         Destroy(effect, pogoEffectLifetime);
     }
-
     void PlayPogoSound()
     {
         if (audioSource != null &&
@@ -472,6 +490,10 @@ public class PlayerController2D : MonoBehaviour
         animator.ResetTrigger("Attack2");
         animator.SetTrigger("Attack1");
 
+        yield return new WaitForSeconds(0.1f);
+
+        DamageEnemies();
+
         yield return new WaitForSeconds(attackCooldown);
 
         isAttacking = false;
@@ -480,14 +502,90 @@ public class PlayerController2D : MonoBehaviour
     IEnumerator Attack2()
     {
         isAttacking = true;
+        canHeavyAttack = false;
 
         animator.ResetTrigger("Attack1");
         animator.SetTrigger("Attack2");
 
+        yield return new WaitForSeconds(0.15f);
+
+        Collider2D[] hitEnemies =
+            Physics2D.OverlapCircleAll(
+                attackPoint.position,
+                attackRange,
+                enemyLayers
+            );
+
+        foreach (Collider2D enemy in hitEnemies)
+        {
+            enemy.SendMessage(
+                "TakeDamage",
+                heavyAttackDamage,
+                SendMessageOptions.DontRequireReceiver
+            );
+            // HIT EFFECT
+            if (hitEffectPrefab != null && !isPogoStriking)
+            {
+                Instantiate(
+                    hitEffectPrefab,
+                    enemy.transform.position,
+                    Quaternion.identity
+                );
+            }
+
+            Rigidbody2D enemyRb =
+                enemy.GetComponent<Rigidbody2D>();
+
+            if (enemyRb != null)
+            {
+                float direction =
+                    transform.localScale.x > 0 ? 1f : -1f;
+
+                enemyRb.linearVelocity =
+                    new Vector2(direction * 8f, 4f);
+            }
+        }
+
         yield return new WaitForSeconds(attackCooldown);
 
         isAttacking = false;
+
+        yield return new WaitForSeconds(heavyAttackCooldown);
+
+        canHeavyAttack = true;
     }
+
+
+
+    void DamageEnemies()
+    {
+        Collider2D[] hitEnemies =
+            Physics2D.OverlapCircleAll(
+                attackPoint.position,
+                attackRange,
+                enemyLayers
+            );
+
+        foreach (Collider2D enemy in hitEnemies)
+        {
+            enemy.SendMessage(
+                "TakeDamage",
+                attackDamage,
+                SendMessageOptions.DontRequireReceiver
+            );
+
+            // HIT EFFECT
+            if (hitEffectPrefab != null && !isPogoStriking)
+            {
+                Instantiate(
+                    hitEffectPrefab,
+                    enemy.transform.position,
+                    Quaternion.identity
+                );
+            }
+        }
+    } 
+
 
     IEnumerator Slide()
     {
@@ -552,9 +650,23 @@ public class PlayerController2D : MonoBehaviour
     {
         isInvincible = true;
 
+        // IGNORE COLLISION WITH ENEMIES
+        Physics2D.IgnoreLayerCollision(
+            LayerMask.NameToLayer("Player"),
+            LayerMask.NameToLayer("Enemy"),
+            true
+        );
+
         yield return new WaitForSeconds(invincibilityTime);
 
         isInvincible = false;
+
+        // ENABLE COLLISION AGAIN
+        Physics2D.IgnoreLayerCollision(
+            LayerMask.NameToLayer("Player"),
+            LayerMask.NameToLayer("Enemy"),
+            false
+        );
     }
 
     public void Heal(int amount)
@@ -565,6 +677,25 @@ public class PlayerController2D : MonoBehaviour
             currentHealth + amount,
             maxHealth
         );
+
+        // HEAL EFFECT
+        if (healEffectPrefab != null)
+        {
+            // Spawn at feet position
+            Vector3 feetPosition = transform.position + new Vector3(0f, -1f, 0f);
+
+            GameObject healEffect = Instantiate(
+                healEffectPrefab,
+                feetPosition,
+                Quaternion.identity
+            );
+
+            // Make particle follow player
+            healEffect.transform.SetParent(transform);
+
+            // Destroy after some time
+            Destroy(healEffect, 2f);
+        }
     }
 
     public void TakeDamage(int damage)
@@ -646,6 +777,15 @@ public class PlayerController2D : MonoBehaviour
             Gizmos.DrawWireSphere(
                 pogoAttackPoint.position,
                 pogoAttackRadius
+            );
+        }
+        if (attackPoint != null)
+        {
+            Gizmos.color = Color.red;
+
+            Gizmos.DrawWireSphere(
+                attackPoint.position,
+                attackRange
             );
         }
     }

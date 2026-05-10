@@ -20,13 +20,25 @@ public class EnemyHealth : MonoBehaviour
     public float moveSpeed = 2f;
     public float waitTime = 1f;
 
+    [Header("Player Damage")]
+    public int contactDamage = 10;
+    public float damageCooldown = 1f;
+
+    private bool canDamagePlayer = true;
+
     private Transform targetPoint;
     private bool isDead = false;
     private bool isWaiting = false;
 
+    // ANIMATOR
+    private Animator animator;
+
     void Start()
     {
         currentHealth = maxHealth;
+
+        // GET ANIMATOR
+        animator = GetComponent<Animator>();
 
         // Start patrol toward Point B
         if (pointA != null && pointB != null)
@@ -41,6 +53,12 @@ public class EnemyHealth : MonoBehaviour
             return;
 
         Patrol();
+
+        // PLAY WALK ANIMATION
+        if (animator != null)
+        {
+            animator.Play("Walk");
+        }
     }
 
     // =========================
@@ -62,11 +80,20 @@ public class EnemyHealth : MonoBehaviour
         // Hit Particle Effect
         if (hitParticle != null)
         {
-            Instantiate(hitParticle, transform.position, Quaternion.identity);
+            Instantiate(
+                hitParticle,
+                transform.position,
+                Quaternion.identity
+            );
         }
 
-        Debug.Log(gameObject.name + " took damage: " + damage +
-                  " | Health Left: " + currentHealth);
+        Debug.Log(
+            gameObject.name +
+            " took damage: " +
+            damage +
+            " | Health Left: " +
+            currentHealth
+        );
 
         // Check Death
         if (currentHealth <= 0)
@@ -76,11 +103,48 @@ public class EnemyHealth : MonoBehaviour
     }
 
     // =========================
+    // PLAYER DAMAGE
+    // =========================
+    private void OnCollisionStay2D(Collision2D collision)
+    {
+        if (!canDamagePlayer || isDead)
+            return;
+
+        if (collision.gameObject.CompareTag("Player"))
+        {
+            PlayerController2D player =
+                collision.gameObject
+                .GetComponent<PlayerController2D>();
+
+            if (player != null)
+            {
+                if (player.isInvincible)
+                    return;
+
+                player.TakeDamage(contactDamage);
+
+                StartCoroutine(DamageCooldown());
+            }
+        }
+    }
+
+    IEnumerator DamageCooldown()
+    {
+        canDamagePlayer = false;
+
+        yield return new WaitForSeconds(damageCooldown);
+
+        canDamagePlayer = true;
+    }
+
+    // =========================
     // PATROL SYSTEM
     // =========================
     void Patrol()
     {
-        if (pointA == null || pointB == null || targetPoint == null)
+        if (pointA == null ||
+            pointB == null ||
+            targetPoint == null)
             return;
 
         if (isWaiting)
@@ -94,9 +158,10 @@ public class EnemyHealth : MonoBehaviour
         );
 
         // Direction Check
-        Vector3 direction = targetPoint.position - transform.position;
+        Vector3 direction =
+            targetPoint.position - transform.position;
 
-        // Proper Flip Without Changing Size
+        // Proper Flip
         Vector3 scale = transform.localScale;
 
         if (direction.x > 0)
@@ -111,7 +176,9 @@ public class EnemyHealth : MonoBehaviour
         transform.localScale = scale;
 
         // Reached Target
-        if (Vector2.Distance(transform.position, targetPoint.position) < 0.1f)
+        if (Vector2.Distance(
+            transform.position,
+            targetPoint.position) < 0.1f)
         {
             StartCoroutine(WaitAndSwitchPoint());
         }
@@ -145,15 +212,15 @@ public class EnemyHealth : MonoBehaviour
 
         Debug.Log(gameObject.name + " died");
 
-        // Disable Collider
         Collider2D col = GetComponent<Collider2D>();
+
         if (col != null)
         {
             col.enabled = false;
         }
 
-        // Stop Rigidbody Movement
         Rigidbody2D rb = GetComponent<Rigidbody2D>();
+
         if (rb != null)
         {
             rb.linearVelocity = Vector2.zero;
@@ -171,10 +238,20 @@ public class EnemyHealth : MonoBehaviour
         {
             Gizmos.color = Color.red;
 
-            Gizmos.DrawLine(pointA.position, pointB.position);
+            Gizmos.DrawLine(
+                pointA.position,
+                pointB.position
+            );
 
-            Gizmos.DrawSphere(pointA.position, 0.2f);
-            Gizmos.DrawSphere(pointB.position, 0.2f);
+            Gizmos.DrawSphere(
+                pointA.position,
+                0.2f
+            );
+
+            Gizmos.DrawSphere(
+                pointB.position,
+                0.2f
+            );
         }
     }
 }
