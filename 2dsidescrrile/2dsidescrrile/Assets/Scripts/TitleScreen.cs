@@ -28,7 +28,7 @@ public class TitleScreen : MonoBehaviour
         // Detect any key press
         if (Input.anyKeyDown)
         {
-            SceneManager.LoadScene(1);
+            SceneTransition.instance.LoadScene(MainMenuSceneName);
         }
     }
 }

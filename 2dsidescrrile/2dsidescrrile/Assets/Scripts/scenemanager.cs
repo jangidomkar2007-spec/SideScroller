@@ -5,7 +5,7 @@ public class scenemanager : MonoBehaviour
 {
     public void Startgame()
     { 
-       SceneManager.LoadSceneAsync(2);
+       SceneTransition.instance.LoadScene("SampleScene");
 
     }
     public void Exitgame()
