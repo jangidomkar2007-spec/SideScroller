@@ -1,10 +1,13 @@
 fileFormatVersion: 2
-guid: 780d5cdb8ee192047930d75d70a666c4
+guid: 4e24e88fc1139d549abdda9060c2a2f8
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -5249799474337193138
-    second: Floating_Plat_0
+      213: -7024611062640077607
+    second: ruins-stair_0
+  - first:
+      213: -9128103729989675637
+    second: ruins-stair_1
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -51,7 +54,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 300
+  spritePixelsToUnits: 100
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -100,133 +103,45 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Floating_Plat_0
+      name: ruins-stair_0
       rect:
         serializedVersion: 2
-        x: 909
-        y: 555
-        width: 2168
-        height: 927
+        x: 1362
+        y: 0
+        width: 1157
+        height: 1616
       alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 921, y: 54, z: 834, w: 33}
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: e4369165137f427b0800000000000000
-      internalID: -5249799474337193138
+      spriteID: 9d41f0ed471938e90800000000000000
+      internalID: -7024611062640077607
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Floating_Plat_1
+      name: ruins-stair_1
       rect:
         serializedVersion: 2
-        x: 2621
-        y: 1040
-        width: 442
-        height: 419
+        x: 2628
+        y: 1497
+        width: 10
+        height: 115
       alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: 5839507a96eb1e047aa425aad76540af
-      internalID: -1038955882
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Floating_Plat_2
-      rect:
-        serializedVersion: 2
-        x: 1401
-        y: 1042
-        width: 423
-        height: 415
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: fd08b0094710c954eb34a28ba3ae5a20
-      internalID: -1908688325
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Floating_Plat_3
-      rect:
-        serializedVersion: 2
-        x: 913
-        y: 1042
-        width: 483
-        height: 412
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 00d3775bdeec8b0468b17145b12d2020
-      internalID: 1793865304
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Floating_Plat_4
-      rect:
-        serializedVersion: 2
-        x: 1824
-        y: 1042
-        width: 415
-        height: 410
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: cb98742083c207b4aaad61dcb7a372e6
-      internalID: -1967852723
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Floating_Plat_5
-      rect:
-        serializedVersion: 2
-        x: 2248
-        y: 1044
-        width: 373
-        height: 408
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 73c3e28239d35794bad1a1a3347fbbd8
-      internalID: 1551518964
+      spriteID: b851c053506725180800000000000000
+      internalID: -9128103729989675637
       vertices: []
       indices: 
       edges: []
@@ -235,7 +150,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 82255e80adf261646aa6e92d9af2c551
+    spriteID: 
     internalID: 0
     vertices: []
     indices: 
@@ -245,12 +160,8 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Floating_Plat_0: -5249799474337193138
-      Floating_Plat_1: -1038955882
-      Floating_Plat_2: -1908688325
-      Floating_Plat_3: 1793865304
-      Floating_Plat_4: -1967852723
-      Floating_Plat_5: 1551518964
+      ruins-stair_0: -7024611062640077607
+      ruins-stair_1: -9128103729989675637
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
