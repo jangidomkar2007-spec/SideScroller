@@ -51,10 +51,31 @@ public class PlayerController2D : MonoBehaviour
     [Header("Attack")]
     public float attackCooldown = 0.2f;
  
+
+
+    [Header("Pogo Strike")]
+    [SerializeField] private float pogoBounceForce = 12f;
+    [SerializeField] private int pogoDamage = 25;
+    [SerializeField] private float pogoCooldown = 0.3f;
+    [SerializeField] private LayerMask enemyLayer;
+
+    [SerializeField] private Transform pogoAttackPoint;
+    [SerializeField] private float pogoAttackRadius = 0.8f;
+
+    [SerializeField] private GameObject pogoEffectPrefab;
+    [SerializeField] private Color pogoHitColor = Color.cyan;
+    [SerializeField] private float pogoEffectLifetime = 0.5f;
+
+    [SerializeField] private AudioClip pogoSound;
+
+    private AudioSource audioSource;
+
+    private bool canPogo = true;
+    private float pogoCooldownTimer;
+    public bool isPogoStriking = false;
+
     [Header("Slide")]
     public bool slideUnlocked = false;
-
-   
     public float slideForce = 14f;
     public float slideDuration = 0.35f;
     public float slideCooldown = 1f;
@@ -103,6 +124,26 @@ public class PlayerController2D : MonoBehaviour
             GameObject spawn = new GameObject("SpawnPoint");
             spawn.transform.position = transform.position;
             respawnPoint = spawn.transform;
+        }
+
+        audioSource = GetComponent<AudioSource>();
+
+        if (audioSource == null && pogoSound != null)
+        {
+            audioSource = gameObject.AddComponent<AudioSource>();
+            audioSource.playOnAwake = false;
+        }
+
+        if (pogoAttackPoint == null)
+        {
+            GameObject obj = new GameObject("PogoAttackPoint");
+
+            obj.transform.parent = transform;
+
+            obj.transform.localPosition =
+                new Vector3(0f, -0.8f, 0f);
+
+            pogoAttackPoint = obj.transform;
         }
     }
 
@@ -209,36 +250,84 @@ public class PlayerController2D : MonoBehaviour
                 isDashing = false;
         }
 
-        
-
-        animator.SetBool("Jumping", !IsGrounded());
 
         bool grounded = IsGrounded();
 
+        // JUMP START
         if (wasGrounded && !grounded)
+        {
+            animator.SetTrigger("JumpStart");
             dustEffect.Play();
+        }
 
+        // IN AIR
+        if (!grounded && rb.linearVelocity.y > 0.1f)
+        {
+            animator.SetBool("IsJumping", true);
+            animator.SetBool("IsFalling", false);
+        }
+
+        // FALLING
+        if (!grounded && rb.linearVelocity.y < -0.1f)
+        {
+            animator.SetBool("IsJumping", false);
+            animator.SetBool("IsFalling", true);
+        }
+
+        // LAND
         if (!wasGrounded && grounded)
+        {
+            animator.SetTrigger("Land");
+
+            animator.SetBool("IsJumping", false);
+            animator.SetBool("IsFalling", false);
+
             dustEffect.Play();
+        }
 
         wasGrounded = grounded;
-        // LEFT CLICK = NORMAL ATTACK
-        if (Input.GetMouseButtonDown(0) && !isAttacking)
+
+        // POGO COOLDOWN
+        if (!canPogo)
+        {
+            pogoCooldownTimer -= Time.deltaTime;
+
+            if (pogoCooldownTimer <= 0)
+            {
+                canPogo = true;
+            }
+        }
+
+        // POGO INPUT
+        bool pogoInput =
+            (Input.GetKey(KeyCode.S) ||
+             Input.GetKey(KeyCode.DownArrow)) &&
+            (Input.GetKeyDown(KeyCode.Space) ||
+             Input.GetMouseButtonDown(0));
+
+        // POGO STRIKE
+        if (pogoInput &&
+            canPogo &&
+            !IsGrounded() &&
+            !isDead)
+        {
+            PerformPogoStrike();
+        }
+
+        if (Input.GetMouseButtonDown(0) &&
+      !isAttacking &&
+      !isPogoStriking)
         {
             StartCoroutine(Attack1());
         }
 
-        // RIGHT CLICK = HEAVY ATTACK
-        if (Input.GetMouseButtonDown(1) && !isAttacking)
+        if (Input.GetMouseButtonDown(1) &&
+            !isAttacking &&
+            !isPogoStriking)
         {
             StartCoroutine(Attack2());
         }
-
-    } 
-
-
-
-  
+    }
 
         void FixedUpdate()
     {
@@ -276,6 +365,105 @@ public class PlayerController2D : MonoBehaviour
         }
 
     }
+
+
+    void PerformPogoStrike()
+    {
+        isPogoStriking = true;
+
+        Collider2D[] hitEnemies =
+            Physics2D.OverlapCircleAll(
+                pogoAttackPoint.position,
+                pogoAttackRadius,
+                enemyLayer
+            );
+
+        if (hitEnemies.Length > 0)
+        {
+            canPogo = false;
+
+            pogoCooldownTimer = pogoCooldown;
+
+            rb.linearVelocity = new Vector2(
+                rb.linearVelocity.x,
+                pogoBounceForce
+            );
+
+            SpawnPogoEffect();
+
+            PlayPogoSound();
+
+            foreach (Collider2D enemy in hitEnemies)
+            {
+                enemy.SendMessage(
+                    "TakeDamage",
+                    pogoDamage,
+                    SendMessageOptions.DontRequireReceiver
+                );
+
+                Rigidbody2D enemyRb =
+                    enemy.GetComponent<Rigidbody2D>();
+
+                if (enemyRb != null)
+                {
+                    enemyRb.linearVelocity =
+                        new Vector2(0, 5f);
+                }
+            }
+        }
+
+        StartCoroutine(ResetPogoState());
+    }
+
+    IEnumerator ResetPogoState()
+    {
+        yield return new WaitForSeconds(0.2f);
+
+        isPogoStriking = false;
+    }
+
+    void SpawnPogoEffect()
+    {
+        if (pogoEffectPrefab == null) return;
+
+        GameObject effect = Instantiate(
+            pogoEffectPrefab,
+            pogoAttackPoint.position,
+            pogoAttackPoint.rotation
+        );
+
+        effect.transform.localScale = Vector3.one;
+
+        SpriteRenderer[] sprites =
+            effect.GetComponentsInChildren<SpriteRenderer>();
+
+        foreach (SpriteRenderer sr in sprites)
+        {
+            sr.color = pogoHitColor;
+        }
+
+        ParticleSystem[] particles =
+            effect.GetComponentsInChildren<ParticleSystem>();
+
+        foreach (ParticleSystem ps in particles)
+        {
+            var main = ps.main;
+
+            main.startColor = pogoHitColor;
+        }
+
+        Destroy(effect, pogoEffectLifetime);
+    }
+
+    void PlayPogoSound()
+    {
+        if (audioSource != null &&
+            pogoSound != null)
+        {
+            audioSource.PlayOneShot(pogoSound);
+        }
+    }
+
 
     IEnumerator Attack1()
     {
@@ -450,5 +638,15 @@ public class PlayerController2D : MonoBehaviour
             transform.position + Vector3.down * castDistance,
             boxSize
         );
+
+        if (pogoAttackPoint != null)
+        {
+            Gizmos.color = Color.cyan;
+
+            Gizmos.DrawWireSphere(
+                pogoAttackPoint.position,
+                pogoAttackRadius
+            );
+        }
     }
 }
