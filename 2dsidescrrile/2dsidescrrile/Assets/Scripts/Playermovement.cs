@@ -29,6 +29,11 @@ public class PlayerController2D : MonoBehaviour
     public float dashForce = 15f;
     public float dashTime = 0.2f;
 
+    [Header("Dash Effect")]
+    public GameObject dashEffectPrefab;
+    public float dashEffectLifetime = 0.5f;
+
+
     [Header("Dash Invincibility")]
     public bool isInvincible = false;
     public float invincibilityTime = 0.25f;
@@ -235,21 +240,24 @@ public class PlayerController2D : MonoBehaviour
             isJumping = false;
 
         if (Input.GetKeyDown(KeyCode.LeftAlt) && !isDashing)
-        {
-            isDashing = true;
-            dashTimer = dashTime;
+{
+    isDashing = true;
 
-            StartCoroutine(DashInvincibility());
+    SpawnDashEffect();
 
-            float dir = moveInput != 0
-                ? Mathf.Sign(moveInput)
-                : transform.localScale.x;
+    dashTimer = dashTime;
 
-            rb.linearVelocity = new Vector2(
-                dir * dashForce,
-                rb.linearVelocity.y
-            );
-        }
+    StartCoroutine(DashInvincibility());
+
+    float dir = moveInput != 0
+        ? Mathf.Sign(moveInput)
+        : transform.localScale.x;
+
+    rb.linearVelocity = new Vector2(
+        dir * dashForce,
+        rb.linearVelocity.y
+    );
+}
 
         if (isDashing)
         {
@@ -378,6 +386,33 @@ public class PlayerController2D : MonoBehaviour
 
     }
 
+    void SpawnDashEffect()
+    {
+        if (dashEffectPrefab == null) return;
+
+        // FEET POSITION
+        Vector3 feetPosition =
+            transform.position + new Vector3(0f, -1f, 0f);
+
+        GameObject effect = Instantiate(
+            dashEffectPrefab,
+            feetPosition,
+            Quaternion.identity
+        );
+
+        // FOLLOW PLAYER DURING DASH
+        effect.transform.SetParent(transform);
+
+        // ROTATION BASED ON DIRECTION
+        if (!facingRight)
+        {
+            Vector3 scale = effect.transform.localScale;
+            scale.x *= -1;
+            effect.transform.localScale = scale;
+        }
+
+        Destroy(effect, dashEffectLifetime);
+    }
 
     void PerformPogoStrike()
     {
@@ -524,13 +559,20 @@ public class PlayerController2D : MonoBehaviour
                 SendMessageOptions.DontRequireReceiver
             );
             // HIT EFFECT
-            if (hitEffectPrefab != null && !isPogoStriking)
+            if (hitEffectPrefab != null)
             {
-                Instantiate(
+                Quaternion effectRotation =
+                    facingRight
+                    ? Quaternion.Euler(0f, 0f, 180f)
+                    : Quaternion.Euler(0f, 0f, -180f);
+
+                GameObject effect = Instantiate(
                     hitEffectPrefab,
-                    enemy.transform.position,
-                    Quaternion.identity
+                    attackPoint.position,
+                    effectRotation
                 );
+
+                Destroy(effect, 0.5f);
             }
 
             Rigidbody2D enemyRb =
@@ -575,13 +617,20 @@ public class PlayerController2D : MonoBehaviour
             );
 
             // HIT EFFECT
-            if (hitEffectPrefab != null && !isPogoStriking)
+            if (hitEffectPrefab != null)
             {
-                Instantiate(
+                Quaternion effectRotation =
+                    facingRight
+                    ? Quaternion.Euler(0f, 0f, 180f)
+                    : Quaternion.Euler(0f, 0f, -180f);
+
+                GameObject effect = Instantiate(
                     hitEffectPrefab,
-                    enemy.transform.position,
-                    Quaternion.identity
+                    attackPoint.position,
+                    effectRotation
                 );
+
+                Destroy(effect, 0.5f);
             }
         }
     } 

@@ -20,27 +20,42 @@ public class EnemyHealth : MonoBehaviour
     public float moveSpeed = 2f;
     public float waitTime = 1f;
 
+    [Header("Chase Settings")]
+    public float chaseRadius = 5f;
+    public float stopChaseDistance = 7f;
+    public float chaseSpeed = 4f;
+
     [Header("Player Damage")]
     public int contactDamage = 10;
     public float damageCooldown = 1f;
 
     private bool canDamagePlayer = true;
 
+    private Transform player;
     private Transform targetPoint;
+
     private bool isDead = false;
     private bool isWaiting = false;
+    private bool isChasing = false;
 
-    // ANIMATOR
     private Animator animator;
+    private Rigidbody2D rb;
 
     void Start()
     {
-        currentHealth = maxHealth;
-
-        // GET ANIMATOR
+        rb = GetComponent<Rigidbody2D>();
         animator = GetComponent<Animator>();
 
-        // Start patrol toward Point B
+        currentHealth = maxHealth;
+
+        GameObject playerObj =
+            GameObject.FindGameObjectWithTag("Player");
+
+        if (playerObj != null)
+        {
+            player = playerObj.transform;
+        }
+
         if (pointA != null && pointB != null)
         {
             targetPoint = pointB;
@@ -52,18 +67,164 @@ public class EnemyHealth : MonoBehaviour
         if (isDead)
             return;
 
-        Patrol();
+        CheckPlayerDistance();
 
-        // PLAY WALK ANIMATION
-        if (animator != null)
+        
+    }
+
+    void FixedUpdate()
+    {
+        if (isDead)
+            return;
+
+        if (isChasing)
         {
-            animator.Play("Walk");
+            ChasePlayer();
+        }
+        else
+        {
+            Patrol();
         }
     }
 
-    // =========================
+    // ===================================
+    // PLAYER DETECTION
+    // ===================================
+    void CheckPlayerDistance()
+    {
+        if (player == null)
+            return;
+
+        float distance =
+            Vector2.Distance(
+                transform.position,
+                player.position
+            );
+
+        // START CHASE
+        if (distance <= chaseRadius)
+        {
+            isChasing = true;
+            isWaiting = false;
+        }
+
+        // STOP CHASE
+        if (distance >= stopChaseDistance)
+        {
+            isChasing = false;
+        }
+    }
+
+    // ===================================
+    // CHASE PLAYER
+    // ===================================
+    void ChasePlayer()
+    {
+        if (player == null)
+            return;
+
+        float direction =
+            Mathf.Sign(
+                player.position.x - transform.position.x
+            );
+
+        rb.linearVelocity = new Vector2(
+            direction * chaseSpeed,
+            rb.linearVelocity.y
+        );
+
+        Flip(direction);
+    }
+
+    // ===================================
+    // PATROL SYSTEM
+    // ===================================
+    void Patrol()
+    {
+        if (pointA == null ||
+            pointB == null ||
+            targetPoint == null)
+            return;
+
+        if (isWaiting)
+        {
+            rb.linearVelocity = new Vector2(
+                0,
+                rb.linearVelocity.y
+            );
+
+            return;
+        }
+
+        float direction =
+            Mathf.Sign(
+                targetPoint.position.x - transform.position.x
+            );
+
+        rb.linearVelocity = new Vector2(
+            direction * moveSpeed,
+            rb.linearVelocity.y
+        );
+
+        Flip(direction);
+
+        float distance =
+            Mathf.Abs(
+                targetPoint.position.x -
+                transform.position.x
+            );
+
+        if (distance <= 0.2f)
+        {
+            StartCoroutine(WaitAndSwitchPoint());
+        }
+    }
+
+    IEnumerator WaitAndSwitchPoint()
+    {
+        isWaiting = true;
+
+        rb.linearVelocity = new Vector2(
+            0,
+            rb.linearVelocity.y
+        );
+
+        yield return new WaitForSeconds(waitTime);
+
+        if (targetPoint == pointA)
+        {
+            targetPoint = pointB;
+        }
+        else
+        {
+            targetPoint = pointA;
+        }
+
+        isWaiting = false;
+    }
+
+    // ===================================
+    // FLIP
+    // ===================================
+    void Flip(float direction)
+    {
+        Vector3 scale = transform.localScale;
+
+        if (direction > 0)
+        {
+            scale.x = Mathf.Abs(scale.x);
+        }
+        else if (direction < 0)
+        {
+            scale.x = -Mathf.Abs(scale.x);
+        }
+
+        transform.localScale = scale;
+    }
+
+    // ===================================
     // DAMAGE SYSTEM
-    // =========================
+    // ===================================
     public void TakeDamage(int damage)
     {
         if (isDead)
@@ -71,13 +232,11 @@ public class EnemyHealth : MonoBehaviour
 
         currentHealth -= damage;
 
-        // Hit Stop Effect
         if (HitStop.Instance != null)
         {
             HitStop.Instance.Trigger(hitStopIntensity);
         }
 
-        // Hit Particle Effect
         if (hitParticle != null)
         {
             Instantiate(
@@ -95,17 +254,18 @@ public class EnemyHealth : MonoBehaviour
             currentHealth
         );
 
-        // Check Death
         if (currentHealth <= 0)
         {
             Die();
         }
     }
 
-    // =========================
+    // ===================================
     // PLAYER DAMAGE
-    // =========================
-    private void OnCollisionStay2D(Collision2D collision)
+    // ===================================
+    private void OnCollisionStay2D(
+        Collision2D collision
+    )
     {
         if (!canDamagePlayer || isDead)
             return;
@@ -132,108 +292,41 @@ public class EnemyHealth : MonoBehaviour
     {
         canDamagePlayer = false;
 
-        yield return new WaitForSeconds(damageCooldown);
+        yield return new WaitForSeconds(
+            damageCooldown
+        );
 
         canDamagePlayer = true;
     }
 
-    // =========================
-    // PATROL SYSTEM
-    // =========================
-    void Patrol()
-    {
-        if (pointA == null ||
-            pointB == null ||
-            targetPoint == null)
-            return;
-
-        if (isWaiting)
-            return;
-
-        // Move Enemy
-        transform.position = Vector2.MoveTowards(
-            transform.position,
-            targetPoint.position,
-            moveSpeed * Time.deltaTime
-        );
-
-        // Direction Check
-        Vector3 direction =
-            targetPoint.position - transform.position;
-
-        // Proper Flip
-        Vector3 scale = transform.localScale;
-
-        if (direction.x > 0)
-        {
-            scale.x = Mathf.Abs(scale.x);
-        }
-        else if (direction.x < 0)
-        {
-            scale.x = -Mathf.Abs(scale.x);
-        }
-
-        transform.localScale = scale;
-
-        // Reached Target
-        if (Vector2.Distance(
-            transform.position,
-            targetPoint.position) < 0.1f)
-        {
-            StartCoroutine(WaitAndSwitchPoint());
-        }
-    }
-
-    IEnumerator WaitAndSwitchPoint()
-    {
-        isWaiting = true;
-
-        yield return new WaitForSeconds(waitTime);
-
-        // Switch Patrol Point
-        if (targetPoint == pointA)
-        {
-            targetPoint = pointB;
-        }
-        else
-        {
-            targetPoint = pointA;
-        }
-
-        isWaiting = false;
-    }
-
-    // =========================
+    // ===================================
     // DEATH SYSTEM
-    // =========================
+    // ===================================
     void Die()
     {
         isDead = true;
 
         Debug.Log(gameObject.name + " died");
 
-        Collider2D col = GetComponent<Collider2D>();
+        Collider2D col =
+            GetComponent<Collider2D>();
 
         if (col != null)
         {
             col.enabled = false;
         }
 
-        Rigidbody2D rb = GetComponent<Rigidbody2D>();
-
-        if (rb != null)
-        {
-            rb.linearVelocity = Vector2.zero;
-        }
+        rb.linearVelocity = Vector2.zero;
 
         Destroy(gameObject, destroyDelay);
     }
 
-    // =========================
+    // ===================================
     // GIZMOS
-    // =========================
+    // ===================================
     void OnDrawGizmos()
     {
+        // PATROL LINE
         if (pointA != null && pointB != null)
         {
             Gizmos.color = Color.red;
@@ -253,5 +346,21 @@ public class EnemyHealth : MonoBehaviour
                 0.2f
             );
         }
+
+        // CHASE RADIUS
+        Gizmos.color = Color.yellow;
+
+        Gizmos.DrawWireSphere(
+            transform.position,
+            chaseRadius
+        );
+
+        // STOP CHASE RADIUS
+        Gizmos.color = Color.cyan;
+
+        Gizmos.DrawWireSphere(
+            transform.position,
+            stopChaseDistance
+        );
     }
 }
