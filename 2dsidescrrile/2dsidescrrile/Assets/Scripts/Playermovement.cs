@@ -4,9 +4,7 @@ using System.Collections;
 
 public class PlayerController2D : MonoBehaviour
 {
-    [Header("Movement")]
-    public float moveSpeed = 5f;
-    public float sprintSpeed = 8f;
+    [Header("Movement")] public float moveSpeed = 5f; public float sprintSpeed = 8f;
 
     [Header("Jump")]
     public float jumpForce = 12f;
@@ -98,6 +96,12 @@ public class PlayerController2D : MonoBehaviour
 
     private bool isSliding = false;
     private bool canSlide = true;
+
+
+    [Header("Ladder")]
+    public float climbSpeed = 4f;
+    private bool isOnLadder = false;
+
 
     private BoxCollider2D box;
     private Vector2 originalSize;
@@ -240,24 +244,26 @@ public class PlayerController2D : MonoBehaviour
             isJumping = false;
 
         if (Input.GetKeyDown(KeyCode.LeftAlt) && !isDashing)
-{
-    isDashing = true;
 
-    SpawnDashEffect();
+        {
+            isDashing = true;
 
-    dashTimer = dashTime;
+            SpawnDashEffect();
 
-    StartCoroutine(DashInvincibility());
+            dashTimer = dashTime;
 
-    float dir = moveInput != 0
-        ? Mathf.Sign(moveInput)
-        : transform.localScale.x;
+            StartCoroutine(DashInvincibility());
 
-    rb.linearVelocity = new Vector2(
-        dir * dashForce,
-        rb.linearVelocity.y
-    );
-}
+            float dir = moveInput != 0
+                ? Mathf.Sign(moveInput)
+                : transform.localScale.x;
+
+            rb.linearVelocity = new Vector2(
+                dir * dashForce,
+                rb.linearVelocity.y
+            );
+
+        }
 
         if (isDashing)
         {
@@ -269,39 +275,16 @@ public class PlayerController2D : MonoBehaviour
 
         bool grounded = IsGrounded();
 
-        // JUMP START
+        animator.SetBool("Jumping", !grounded);
+
         if (wasGrounded && !grounded)
-        {
-            animator.SetTrigger("JumpStart");
             dustEffect.Play();
-        }
 
-        // IN AIR
-        if (!grounded && rb.linearVelocity.y > 0.1f)
-        {
-            animator.SetBool("IsJumping", true);
-            animator.SetBool("IsFalling", false);
-        }
-
-        // FALLING
-        if (!grounded && rb.linearVelocity.y < -0.1f)
-        {
-            animator.SetBool("IsJumping", false);
-            animator.SetBool("IsFalling", true);
-        }
-
-        // LAND
         if (!wasGrounded && grounded)
-        {
-            animator.SetTrigger("Land");
-
-            animator.SetBool("IsJumping", false);
-            animator.SetBool("IsFalling", false);
-
             dustEffect.Play();
-        }
 
         wasGrounded = grounded;
+
         // POGO COOLDOWN
 
 
@@ -346,11 +329,39 @@ public class PlayerController2D : MonoBehaviour
         {
             StartCoroutine(Attack2());
         }
+        // LADDER CLIMB
+        if (isOnLadder)
+        {
+            float vertical = Input.GetAxisRaw("Vertical");
+
+            if (vertical != 0)
+            {
+
+                rb.gravityScale = 0f;
+
+                rb.linearVelocity = new Vector2(
+                    rb.linearVelocity.x,
+                    vertical * climbSpeed
+                );
+            }
+            else
+            {
+                rb.linearVelocity = new Vector2(
+                    rb.linearVelocity.x,
+                    0f
+                );
+            }
+        }
+        else
+        {
+
+            rb.gravityScale = 3f;
+        }
     }
 
     void FixedUpdate()
     {
-      
+
         if (isDead) return;
 
         if (!isDashing && !isSliding)
@@ -384,6 +395,25 @@ public class PlayerController2D : MonoBehaviour
             }
         }
 
+    }
+
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.CompareTag("Ladder"))
+        {
+            isOnLadder = true;
+        }
+    }
+
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        if (collision.CompareTag("Ladder"))
+        {
+            isOnLadder = false;
+
+            rb.gravityScale = 3f;
+        }
     }
 
     void SpawnDashEffect()
@@ -457,7 +487,7 @@ public class PlayerController2D : MonoBehaviour
                         new Vector2(0, 5f);
                 }
             }
-        
+
         }
 
         StartCoroutine(ResetPogoState());
@@ -633,7 +663,7 @@ public class PlayerController2D : MonoBehaviour
                 Destroy(effect, 0.5f);
             }
         }
-    } 
+    }
 
 
     IEnumerator Slide()
@@ -660,7 +690,6 @@ public class PlayerController2D : MonoBehaviour
 
         canSlide = true;
     }
-
     void StartJump()
     {
         isJumping = true;
@@ -838,4 +867,5 @@ public class PlayerController2D : MonoBehaviour
             );
         }
     }
+
 }

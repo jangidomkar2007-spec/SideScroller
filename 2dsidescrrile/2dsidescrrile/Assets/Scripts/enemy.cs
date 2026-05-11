@@ -214,17 +214,15 @@ public class EnemyHealth : MonoBehaviour
         if (player == null)
             return;
 
-        float direction =
-            Mathf.Sign(
-                player.position.x - transform.position.x
-            );
+        Vector2 direction =
+            (player.position - transform.position).normalized;
 
         rb.linearVelocity = new Vector2(
-            direction * chaseSpeed,
+            direction.x * chaseSpeed,
             rb.linearVelocity.y
         );
 
-        Flip(direction);
+        Flip(direction.x);
     }
 
     // ===================================

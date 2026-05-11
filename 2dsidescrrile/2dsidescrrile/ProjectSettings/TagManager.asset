@@ -9,6 +9,7 @@ TagManager:
   - HealthPickup
   - Ground
   - Checkpoint
+  - Ladder
   layers:
   - Default
   - TransparentFX

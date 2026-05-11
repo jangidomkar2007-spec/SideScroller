@@ -1,27 +1,37 @@
-using System.Collections;
 using UnityEngine;
+using System.Collections;
 
 public class HitStop : MonoBehaviour
 {
     public static HitStop Instance;
 
-    void Awake()
+    [Header("Hit Stop")]
+    public float defaultFreezeTime = 0.08f;
+
+    private void Awake()
     {
-        if (Instance == null) Instance = this;
-        else Destroy(gameObject);
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
     }
 
-    
-    public void Trigger(float duration)
+    public void Trigger(float freezeTime)
     {
-        if (gameObject.activeInHierarchy)
-            StartCoroutine(DoHitStop(duration));
+        StopAllCoroutines();
+        StartCoroutine(HitStopCoroutine(freezeTime));
     }
 
-    IEnumerator DoHitStop(float duration)
+    IEnumerator HitStopCoroutine(float freezeTime)
     {
         Time.timeScale = 0f;
-        yield return new WaitForSecondsRealtime(duration); 
+
+        yield return new WaitForSecondsRealtime(freezeTime);
+
         Time.timeScale = 1f;
     }
 }
