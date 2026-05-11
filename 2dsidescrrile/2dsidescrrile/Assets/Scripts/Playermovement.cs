@@ -275,7 +275,7 @@ public class PlayerController2D : MonoBehaviour
 
         bool grounded = IsGrounded();
 
-        animator.SetBool("Jumping", !grounded);
+        animator.SetBool("IsJumping", !grounded);
 
         if (wasGrounded && !grounded)
             dustEffect.Play();
