@@ -310,8 +310,6 @@ AnimatorStateMachine:
   m_ChildStateMachines: []
   m_AnyStateTransitions:
   - {fileID: 4853132850094837708}
-<<<<<<< Updated upstream
-=======
   - {fileID: 1063587503925290584}
   m_EntryTransitions: []
   m_StateMachineTransitions: {}
