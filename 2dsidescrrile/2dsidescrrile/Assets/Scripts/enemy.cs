@@ -18,6 +18,7 @@ public class EnemyHealth : MonoBehaviour
     [Header("Patrol Settings")]
     public Transform pointA;
     public Transform pointB;
+
     public float moveSpeed = 2f;
     public float waitTime = 1f;
 
@@ -30,14 +31,25 @@ public class EnemyHealth : MonoBehaviour
     public int contactDamage = 10;
     public float damageCooldown = 1f;
 
+    [Header("Drops")]
+    public GameObject healingDropPrefab;
+    public GameObject doubleJumpDropPrefab;
+
+    [Range(0, 100)]
+    public int healingDropChance = 50;
+
+    [Range(0, 100)]
+    public int doubleJumpDropChance = 20;
+
     private bool canDamagePlayer = true;
 
     private Transform player;
-    private Transform targetPoint;
 
     private bool isDead = false;
     private bool isWaiting = false;
     private bool isChasing = false;
+
+    private int moveDirection = 1;
 
     private Animator animator;
     private Rigidbody2D rb;
@@ -45,8 +57,11 @@ public class EnemyHealth : MonoBehaviour
     // ===================================
     // HEALTH BAR
     // ===================================
+
     [Header("Health Bar")]
-    public Vector3 healthBarOffset = new Vector3(0f, 1.2f, 0f);
+    public Vector3 healthBarOffset =
+        new Vector3(0f, 1.2f, 0f);
+
     public float healthBarWidth = 1f;
     public float healthBarHeight = 0.12f;
 
@@ -69,81 +84,130 @@ public class EnemyHealth : MonoBehaviour
             player = playerObj.transform;
         }
 
-        if (pointA != null && pointB != null)
-        {
-            targetPoint = pointB;
-        }
-
         CreateHealthBar();
+
+        // START DIRECTION
+        if (pointB != null)
+        {
+            if (pointB.position.x < transform.position.x)
+            {
+                moveDirection = -1;
+            }
+            else
+            {
+                moveDirection = 1;
+            }
+        }
     }
 
     // ===================================
     // HEALTH BAR SETUP
     // ===================================
+
     void CreateHealthBar()
     {
-        // Root object positioned above enemy
         healthBarRoot = new GameObject("HealthBar");
-        healthBarRoot.transform.SetParent(transform);
-        healthBarRoot.transform.localPosition = healthBarOffset;
-        healthBarRoot.transform.localRotation = Quaternion.identity;
-        healthBarRoot.transform.localScale = Vector3.one;
 
-        // World-space canvas so it sits in the scene
-        healthBarCanvas = healthBarRoot.AddComponent<Canvas>();
-        healthBarCanvas.renderMode = RenderMode.WorldSpace;
-        healthBarCanvas.sortingLayerName = "Default";
-        healthBarCanvas.sortingOrder = 10;
+        healthBarRoot.transform.SetParent(transform);
+
+        healthBarRoot.transform.localPosition =
+            healthBarOffset;
+
+        healthBarCanvas =
+            healthBarRoot.AddComponent<Canvas>();
+
+        healthBarCanvas.renderMode =
+            RenderMode.WorldSpace;
 
         RectTransform canvasRect =
             healthBarRoot.GetComponent<RectTransform>();
-        canvasRect.sizeDelta = new Vector2(healthBarWidth, healthBarHeight);
 
-        // Background (dark)
-        GameObject bg = new GameObject("Background");
-        bg.transform.SetParent(healthBarRoot.transform, false);
+        canvasRect.sizeDelta =
+            new Vector2(
+                healthBarWidth,
+                healthBarHeight
+            );
 
-        Image bgImage = bg.AddComponent<Image>();
-        bgImage.color = new Color(0.15f, 0.15f, 0.15f, 0.85f);
+        // BACKGROUND
 
-        RectTransform bgRect = bg.GetComponent<RectTransform>();
+        GameObject bg =
+            new GameObject("Background");
+
+        bg.transform.SetParent(
+            healthBarRoot.transform,
+            false
+        );
+
+        Image bgImage =
+            bg.AddComponent<Image>();
+
+        bgImage.color =
+            new Color(
+                0.15f,
+                0.15f,
+                0.15f,
+                0.85f
+            );
+
+        RectTransform bgRect =
+            bg.GetComponent<RectTransform>();
+
         bgRect.anchorMin = Vector2.zero;
         bgRect.anchorMax = Vector2.one;
         bgRect.offsetMin = Vector2.zero;
         bgRect.offsetMax = Vector2.zero;
 
-        // Fill (green → red as health drops)
-        GameObject fill = new GameObject("Fill");
-        fill.transform.SetParent(healthBarRoot.transform, false);
+        // FILL
 
-        healthBarFill = fill.AddComponent<Image>();
+        GameObject fill =
+            new GameObject("Fill");
+
+        fill.transform.SetParent(
+            healthBarRoot.transform,
+            false
+        );
+
+        healthBarFill =
+            fill.AddComponent<Image>();
+
         healthBarFill.color = Color.green;
-        healthBarFill.type = Image.Type.Filled;
-        healthBarFill.fillMethod = Image.FillMethod.Horizontal;
-        healthBarFill.fillOrigin = 0; // fills left → right
+
+        healthBarFill.type =
+            Image.Type.Filled;
+
+        healthBarFill.fillMethod =
+            Image.FillMethod.Horizontal;
+
         healthBarFill.fillAmount = 1f;
 
-        RectTransform fillRect = fill.GetComponent<RectTransform>();
+        RectTransform fillRect =
+            fill.GetComponent<RectTransform>();
+
         fillRect.anchorMin = Vector2.zero;
         fillRect.anchorMax = Vector2.one;
         fillRect.offsetMin = Vector2.zero;
         fillRect.offsetMax = Vector2.zero;
 
-        // Hide bar at full health — shows on first hit
         healthBarRoot.SetActive(false);
     }
 
     void UpdateHealthBar()
     {
-        if (healthBarFill == null) return;
+        if (healthBarFill == null)
+            return;
 
-        float fraction = (float)currentHealth / maxHealth;
+        float fraction =
+            (float)currentHealth / maxHealth;
+
         healthBarFill.fillAmount = fraction;
 
-        // Green at full, red at empty
-        healthBarFill.color = Color.Lerp(Color.red, Color.green, fraction);
+        healthBarFill.color =
+            Color.Lerp(
+                Color.red,
+                Color.green,
+                fraction
+            );
 
-        // Keep bar facing the camera so it's always readable
         if (Camera.main != null)
         {
             healthBarRoot.transform.rotation =
@@ -158,9 +222,13 @@ public class EnemyHealth : MonoBehaviour
 
         CheckPlayerDistance();
 
-        // Keep health bar facing camera every frame
-        if (healthBarRoot != null && healthBarRoot.activeSelf)
+        if (
+            healthBarRoot != null &&
+            healthBarRoot.activeSelf
+        )
+        {
             UpdateHealthBar();
+        }
     }
 
     void FixedUpdate()
@@ -181,6 +249,7 @@ public class EnemyHealth : MonoBehaviour
     // ===================================
     // PLAYER DETECTION
     // ===================================
+
     void CheckPlayerDistance()
     {
         if (player == null)
@@ -192,15 +261,17 @@ public class EnemyHealth : MonoBehaviour
                 player.position
             );
 
-        // START CHASE
-        if (distance <= chaseRadius)
+        if (
+            !isChasing &&
+            distance <= chaseRadius
+        )
         {
             isChasing = true;
-            isWaiting = false;
         }
-
-        // STOP CHASE
-        if (distance >= stopChaseDistance)
+        else if (
+            isChasing &&
+            distance >= stopChaseDistance
+        )
         {
             isChasing = false;
         }
@@ -209,85 +280,96 @@ public class EnemyHealth : MonoBehaviour
     // ===================================
     // CHASE PLAYER
     // ===================================
+
     void ChasePlayer()
     {
         if (player == null)
             return;
 
-        Vector2 direction =
-            (player.position - transform.position).normalized;
+        float direction =
+            Mathf.Sign(
+                player.position.x -
+                transform.position.x
+            );
 
-        rb.linearVelocity = new Vector2(
-            direction.x * chaseSpeed,
-            rb.linearVelocity.y
-        );
+        rb.linearVelocity =
+            new Vector2(
+                direction * chaseSpeed,
+                rb.linearVelocity.y
+            );
 
-        Flip(direction.x);
+        Flip(direction);
     }
 
     // ===================================
-    // PATROL SYSTEM
+    // PRO PATROL SYSTEM
     // ===================================
+
     void Patrol()
     {
-        if (pointA == null ||
-            pointB == null ||
-            targetPoint == null)
+        if (
+            pointA == null ||
+            pointB == null
+        )
             return;
 
         if (isWaiting)
         {
-            rb.linearVelocity = new Vector2(
-                0,
-                rb.linearVelocity.y
-            );
+            rb.linearVelocity =
+                new Vector2(
+                    0,
+                    rb.linearVelocity.y
+                );
 
             return;
         }
 
-        float direction =
-            Mathf.Sign(
-                targetPoint.position.x - transform.position.x
+        rb.linearVelocity =
+            new Vector2(
+                moveDirection * moveSpeed,
+                rb.linearVelocity.y
             );
 
-        rb.linearVelocity = new Vector2(
-            direction * moveSpeed,
-            rb.linearVelocity.y
-        );
+        Flip(moveDirection);
 
-        Flip(direction);
+        // RIGHT LIMIT
 
-        float distance =
-            Mathf.Abs(
-                targetPoint.position.x -
-                transform.position.x
-            );
-
-        if (distance <= 0.2f)
+        if (
+            moveDirection > 0 &&
+            transform.position.x >=
+            pointB.position.x
+        )
         {
-            StartCoroutine(WaitAndSwitchPoint());
+            StartCoroutine(TurnAround());
+        }
+
+        // LEFT LIMIT
+
+        else if (
+            moveDirection < 0 &&
+            transform.position.x <=
+            pointA.position.x
+        )
+        {
+            StartCoroutine(TurnAround());
         }
     }
 
-    IEnumerator WaitAndSwitchPoint()
+    IEnumerator TurnAround()
     {
         isWaiting = true;
 
-        rb.linearVelocity = new Vector2(
-            0,
-            rb.linearVelocity.y
-        );
+        rb.linearVelocity =
+            new Vector2(
+                0,
+                rb.linearVelocity.y
+            );
 
         yield return new WaitForSeconds(waitTime);
 
-        if (targetPoint == pointA)
-        {
-            targetPoint = pointB;
-        }
-        else
-        {
-            targetPoint = pointA;
-        }
+        moveDirection *= -1;
+
+        Flip(moveDirection);
 
         isWaiting = false;
     }
@@ -295,17 +377,21 @@ public class EnemyHealth : MonoBehaviour
     // ===================================
     // FLIP
     // ===================================
+
     void Flip(float direction)
     {
-        Vector3 scale = transform.localScale;
+        Vector3 scale =
+            transform.localScale;
 
         if (direction > 0)
         {
-            scale.x = Mathf.Abs(scale.x);
+            scale.x =
+                Mathf.Abs(scale.x);
         }
         else if (direction < 0)
         {
-            scale.x = -Mathf.Abs(scale.x);
+            scale.x =
+                -Mathf.Abs(scale.x);
         }
 
         transform.localScale = scale;
@@ -314,6 +400,7 @@ public class EnemyHealth : MonoBehaviour
     // ===================================
     // DAMAGE SYSTEM
     // ===================================
+
     public void TakeDamage(int damage)
     {
         if (isDead)
@@ -321,16 +408,18 @@ public class EnemyHealth : MonoBehaviour
 
         currentHealth -= damage;
 
-        // Show and update health bar on first hit
         if (healthBarRoot != null)
         {
             healthBarRoot.SetActive(true);
+
             UpdateHealthBar();
         }
 
         if (HitStop.Instance != null)
         {
-            HitStop.Instance.Trigger(hitStopIntensity);
+            HitStop.Instance.Trigger(
+                hitStopIntensity
+            );
         }
 
         if (hitParticle != null)
@@ -342,14 +431,6 @@ public class EnemyHealth : MonoBehaviour
             );
         }
 
-        Debug.Log(
-            gameObject.name +
-            " took damage: " +
-            damage +
-            " | Health Left: " +
-            currentHealth
-        );
-
         if (currentHealth <= 0)
         {
             Die();
@@ -359,14 +440,22 @@ public class EnemyHealth : MonoBehaviour
     // ===================================
     // PLAYER DAMAGE
     // ===================================
+
     private void OnCollisionStay2D(
         Collision2D collision
     )
     {
-        if (!canDamagePlayer || isDead)
+        if (
+            !canDamagePlayer ||
+            isDead
+        )
             return;
 
-        if (collision.gameObject.CompareTag("Player"))
+        if (
+            collision.gameObject.CompareTag(
+                "Player"
+            )
+        )
         {
             PlayerController2D player =
                 collision.gameObject
@@ -379,7 +468,9 @@ public class EnemyHealth : MonoBehaviour
 
                 player.TakeDamage(contactDamage);
 
-                StartCoroutine(DamageCooldown());
+                StartCoroutine(
+                    DamageCooldown()
+                );
             }
         }
     }
@@ -398,11 +489,10 @@ public class EnemyHealth : MonoBehaviour
     // ===================================
     // DEATH SYSTEM
     // ===================================
+
     void Die()
     {
         isDead = true;
-
-        Debug.Log(gameObject.name + " died");
 
         Collider2D col =
             GetComponent<Collider2D>();
@@ -414,16 +504,55 @@ public class EnemyHealth : MonoBehaviour
 
         rb.linearVelocity = Vector2.zero;
 
-        Destroy(gameObject, destroyDelay);
+        int randomValue =
+            Random.Range(0, 100);
+
+        if (
+            randomValue <
+            doubleJumpDropChance
+        )
+        {
+            if (doubleJumpDropPrefab != null)
+            {
+                Instantiate(
+                    doubleJumpDropPrefab,
+                    transform.position,
+                    Quaternion.identity
+                );
+            }
+        }
+        else if (
+            randomValue <
+            healingDropChance +
+            doubleJumpDropChance
+        )
+        {
+            if (healingDropPrefab != null)
+            {
+                Instantiate(
+                    healingDropPrefab,
+                    transform.position,
+                    Quaternion.identity
+                );
+            }
+        }
+
+        Destroy(
+            gameObject,
+            destroyDelay
+        );
     }
 
     // ===================================
     // GIZMOS
     // ===================================
+
     void OnDrawGizmos()
     {
-        // PATROL LINE
-        if (pointA != null && pointB != null)
+        if (
+            pointA != null &&
+            pointB != null
+        )
         {
             Gizmos.color = Color.red;
 
@@ -443,7 +572,6 @@ public class EnemyHealth : MonoBehaviour
             );
         }
 
-        // CHASE RADIUS
         Gizmos.color = Color.yellow;
 
         Gizmos.DrawWireSphere(
@@ -451,7 +579,6 @@ public class EnemyHealth : MonoBehaviour
             chaseRadius
         );
 
-        // STOP CHASE RADIUS
         Gizmos.color = Color.cyan;
 
         Gizmos.DrawWireSphere(

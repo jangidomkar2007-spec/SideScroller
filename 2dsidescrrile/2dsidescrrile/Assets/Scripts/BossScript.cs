@@ -4,54 +4,54 @@ using UnityEngine.UI;
 
 public class BossHealth : MonoBehaviour
 {
-    [Header("Boss Health")]
+    [Header("Boss Stats")]
     public int maxHealth = 300;
     private int currentHealth;
 
-    [Header("Death Settings")]
-    public float destroyDelay = 1f;
-
-    [Header("Hit Effects")]
-    public float hitStopIntensity = 0.1f;
-    public GameObject hitParticle;
-
-    [Header("Player Damage")]
-    public int contactDamage = 25;
-    public float damageCooldown = 1f;
-
     [Header("Attack")]
     public float attackRange = 2f;
-    public float attackCooldown = 1.5f;
+    public int attackDamage = 25;
+    public float attackCooldown = 2f;
 
-    private float attackTimer;
+    [Header("Death")]
+    public float destroyDelay = 2f;
 
-    private bool canDamagePlayer = true;
+    [Header("Effects")]
+    public GameObject hitParticle;
+    public float hitStopIntensity = 0.08f;
+
+    [Header("Health Bar")]
+    public Vector3 healthBarOffset =
+        new Vector3(0f, 2.5f, 0f);
+
+    public float healthBarWidth = 2.5f;
+    public float healthBarHeight = 0.25f;
+
+    private int currentAttackCooldown;
+
     private bool isDead = false;
+    private bool canAttack = true;
 
     private Animator animator;
     private Rigidbody2D rb;
     private Transform player;
 
-    // ===================================
     // HEALTH BAR
-    // ===================================
-    [Header("Boss Health Bar")]
-    public Vector3 healthBarOffset =
-        new Vector3(0f, 2f, 0f);
-
-    public float healthBarWidth = 2.5f;
-    public float healthBarHeight = 0.2f;
-
     private GameObject healthBarRoot;
     private Image healthBarFill;
     private Canvas healthBarCanvas;
 
     void Start()
     {
-        rb = GetComponent<Rigidbody2D>();
-        animator = GetComponent<Animator>();
-
         currentHealth = maxHealth;
+
+        animator = GetComponent<Animator>();
+        rb = GetComponent<Rigidbody2D>();
+
+        // IMPORTANT
+        // BOSS SHOULD NOT MOVE WHEN HIT
+        rb.bodyType = RigidbodyType2D.Kinematic;
+        rb.linearVelocity = Vector2.zero;
 
         GameObject playerObj =
             GameObject.FindGameObjectWithTag("Player");
@@ -64,21 +64,186 @@ public class BossHealth : MonoBehaviour
         CreateHealthBar();
     }
 
-    // ===================================
-    // CREATE HEALTH BAR
-    // ===================================
+    void Update()
+    {
+        if (isDead)
+            return;
+
+        FacePlayer();
+
+        HandleAttack();
+
+        UpdateHealthBar();
+    }
+
+    // =================================
+    // FACE PLAYER
+    // =================================
+    void FacePlayer()
+    {
+        if (player == null)
+            return;
+
+        if (player.position.x > transform.position.x)
+        {
+            transform.localScale =
+                new Vector3(1, 1, 1);
+        }
+        else
+        {
+            transform.localScale =
+                new Vector3(-1, 1, 1);
+        }
+    }
+
+    // =================================
+    // ATTACK SYSTEM
+    // =================================
+    void HandleAttack()
+    {
+        if (player == null || !canAttack)
+            return;
+
+        float distance =
+            Vector2.Distance(
+                transform.position,
+                player.position
+            );
+
+        if (distance <= attackRange)
+        {
+            StartCoroutine(AttackRoutine());
+        }
+    }
+
+    IEnumerator AttackRoutine()
+    {
+        canAttack = false;
+
+        // ATTACK ANIMATION
+        animator.SetTrigger("Attack");
+
+        yield return new WaitForSeconds(0.4f);
+
+        // DAMAGE PLAYER
+        if (player != null)
+        {
+            float distance =
+                Vector2.Distance(
+                    transform.position,
+                    player.position
+                );
+
+            if (distance <= attackRange)
+            {
+                PlayerController2D pc =
+                    player.GetComponent<PlayerController2D>();
+
+                if (pc != null)
+                {
+                    if (!pc.isInvincible)
+                    {
+                        pc.TakeDamage(attackDamage);
+                    }
+                }
+            }
+        }
+
+        yield return new WaitForSeconds(
+            attackCooldown
+        );
+
+        canAttack = true;
+    }
+
+    // =================================
+    // DAMAGE SYSTEM
+    // =================================
+    public void TakeDamage(int damage)
+    {
+        if (isDead)
+            return;
+
+        currentHealth -= damage;
+
+        // SHOW HEALTH BAR
+        if (healthBarRoot != null)
+        {
+            healthBarRoot.SetActive(true);
+        }
+
+        // HIT PARTICLE
+        if (hitParticle != null)
+        {
+            Instantiate(
+                hitParticle,
+                transform.position,
+                Quaternion.identity
+            );
+        }
+
+        // HIT STOP
+        if (HitStop.Instance != null)
+        {
+            HitStop.Instance.Trigger(
+                hitStopIntensity
+            );
+        }
+
+        // OPTIONAL HIT ANIMATION
+        animator.SetTrigger("Hit");
+
+        Debug.Log(
+            "Boss Took Damage: " + damage
+        );
+
+        if (currentHealth <= 0)
+        {
+            Die();
+        }
+    }
+
+    // =================================
+    // DEATH
+    // =================================
+    void Die()
+    {
+        isDead = true;
+
+        Debug.Log("Boss Died");
+
+        rb.linearVelocity = Vector2.zero;
+
+        Collider2D col =
+            GetComponent<Collider2D>();
+
+        if (col != null)
+        {
+            col.enabled = false;
+        }
+
+        animator.SetTrigger("Death");
+
+        Destroy(
+            gameObject,
+            destroyDelay
+        );
+    }
+
+    // =================================
+    // HEALTH BAR
+    // =================================
     void CreateHealthBar()
     {
         healthBarRoot =
             new GameObject("BossHealthBar");
 
-        healthBarRoot.transform.SetParent(transform);
+        healthBarRoot.transform.SetParent(
+            transform
+        );
 
         healthBarRoot.transform.localPosition =
             healthBarOffset;
-
-        healthBarRoot.transform.localScale =
-            Vector3.one;
 
         healthBarCanvas =
             healthBarRoot.AddComponent<Canvas>();
@@ -111,10 +276,10 @@ public class BossHealth : MonoBehaviour
 
         bgImage.color =
             new Color(
-                0.1f,
-                0.1f,
-                0.1f,
-                0.9f
+                0f,
+                0f,
+                0f,
+                0.8f
             );
 
         RectTransform bgRect =
@@ -145,8 +310,6 @@ public class BossHealth : MonoBehaviour
         healthBarFill.fillMethod =
             Image.FillMethod.Horizontal;
 
-        healthBarFill.fillOrigin = 0;
-
         healthBarFill.fillAmount = 1f;
 
         RectTransform fillRect =
@@ -157,35 +320,22 @@ public class BossHealth : MonoBehaviour
         fillRect.offsetMin = Vector2.zero;
         fillRect.offsetMax = Vector2.zero;
 
-        // Hide until boss takes damage
         healthBarRoot.SetActive(false);
-    }
-
-    void Update()
-    {
-        if (isDead)
-            return;
-
-        if (
-            healthBarRoot != null &&
-            healthBarRoot.activeSelf
-        )
-        {
-            UpdateHealthBar();
-        }
-
-        HandleAttack();
     }
 
     void UpdateHealthBar()
     {
-        if (healthBarFill == null)
+        if (
+            healthBarFill == null ||
+            healthBarRoot == null
+        )
             return;
 
-        float fraction =
+        float healthPercent =
             (float)currentHealth / maxHealth;
 
-        healthBarFill.fillAmount = fraction;
+        healthBarFill.fillAmount =
+            healthPercent;
 
         if (Camera.main != null)
         {
@@ -194,173 +344,9 @@ public class BossHealth : MonoBehaviour
         }
     }
 
-    // ===================================
-    // ATTACK SYSTEM
-    // ===================================
-    void HandleAttack()
-    {
-        if (player == null)
-            return;
-
-        attackTimer -= Time.deltaTime;
-
-        float distance =
-            Vector2.Distance(
-                transform.position,
-                player.position
-            );
-
-        // FACE PLAYER
-        if (player.position.x > transform.position.x)
-        {
-            transform.localScale =
-                new Vector3(1, 1, 1);
-        }
-        else
-        {
-            transform.localScale =
-                new Vector3(-1, 1, 1);
-        }
-
-        // ATTACK
-        if (
-            distance <= attackRange &&
-            attackTimer <= 0
-        )
-        {
-            animator.SetTrigger("Attack");
-
-            attackTimer = attackCooldown;
-        }
-    }
-
-    // ===================================
-    // DAMAGE SYSTEM
-    // ===================================
-    public void TakeDamage(int damage)
-    {
-        if (isDead)
-            return;
-
-        currentHealth -= damage;
-
-        // SHOW HEALTH BAR
-        if (healthBarRoot != null)
-        {
-            healthBarRoot.SetActive(true);
-            UpdateHealthBar();
-        }
-
-        // HIT STOP
-        if (HitStop.Instance != null)
-        {
-            HitStop.Instance.Trigger(
-                hitStopIntensity
-            );
-        }
-
-        // HIT PARTICLE
-        if (hitParticle != null)
-        {
-            Instantiate(
-                hitParticle,
-                transform.position,
-                Quaternion.identity
-            );
-        }
-
-        Debug.Log(
-            gameObject.name +
-            " Boss took damage: " +
-            damage
-        );
-
-        if (currentHealth <= 0)
-        {
-            Die();
-        }
-    }
-
-    // ===================================
-    // PLAYER DAMAGE
-    // ===================================
-    void OnCollisionStay2D(
-        Collision2D collision
-    )
-    {
-        if (!canDamagePlayer || isDead)
-            return;
-
-        if (
-            collision.gameObject.CompareTag(
-                "Player"
-            )
-        )
-        {
-            PlayerController2D player =
-                collision.gameObject
-                .GetComponent<PlayerController2D>();
-
-            if (player != null)
-            {
-                if (player.isInvincible)
-                    return;
-
-                player.TakeDamage(
-                    contactDamage
-                );
-
-                StartCoroutine(
-                    DamageCooldown()
-                );
-            }
-        }
-    }
-
-    IEnumerator DamageCooldown()
-    {
-        canDamagePlayer = false;
-
-        yield return new WaitForSeconds(
-            damageCooldown
-        );
-
-        canDamagePlayer = true;
-    }
-
-    // ===================================
-    // DEATH
-    // ===================================
-    void Die()
-    {
-        isDead = true;
-
-        Debug.Log(
-            gameObject.name + " Boss died"
-        );
-
-        Collider2D col =
-            GetComponent<Collider2D>();
-
-        if (col != null)
-        {
-            col.enabled = false;
-        }
-
-        if (rb != null)
-        {
-            rb.linearVelocity = Vector2.zero;
-        }
-
-        Destroy(
-            gameObject,
-            destroyDelay
-        );
-    }
-
-    // ===================================
+    // =================================
     // GIZMOS
-    // ===================================
+    // =================================
     void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.red;

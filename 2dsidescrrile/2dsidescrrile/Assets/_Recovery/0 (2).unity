@@ -9074,7 +9074,7 @@ GameObject:
   - component: {fileID: 1249446706}
   - component: {fileID: 1249446705}
   - component: {fileID: 1249446707}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: bridge (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -10548,7 +10548,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1420532302}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: GameObject
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -12430,7 +12430,7 @@ Transform:
   m_GameObject: {fileID: 1789729268}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0.00034529547, w: -0.99999994}
-  m_LocalPosition: {x: 1.37, y: -0.1, z: 0}
+  m_LocalPosition: {x: 3.4001067, y: -0.11765469, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -12824,18 +12824,6 @@ PrefabInstance:
       propertyPath: hitStopIntensity
       value: 0.09
       objectReference: {fileID: 0}
-    - target: {fileID: 1399799675528913801, guid: 6a958ed3da77a1f44a5df5119ffaf11f, type: 3}
-      propertyPath: healingDropChance
-      value: 51
-      objectReference: {fileID: 0}
-    - target: {fileID: 1399799675528913801, guid: 6a958ed3da77a1f44a5df5119ffaf11f, type: 3}
-      propertyPath: healingDropPrefab
-      value: 
-      objectReference: {fileID: 4982101772159833115, guid: b343c9aafa1ed9044ac814609485602f, type: 3}
-    - target: {fileID: 1399799675528913801, guid: 6a958ed3da77a1f44a5df5119ffaf11f, type: 3}
-      propertyPath: doubleJumpDropPrefab
-      value: 
-      objectReference: {fileID: 7171354107939512575, guid: f319d3f3a3079ab4cbbae50984598e1e, type: 3}
     - target: {fileID: 5077422672693608011, guid: 6a958ed3da77a1f44a5df5119ffaf11f, type: 3}
       propertyPath: m_LocalPosition.x
       value: 763.61

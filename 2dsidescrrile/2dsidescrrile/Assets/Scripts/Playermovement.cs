@@ -795,13 +795,21 @@ public class PlayerController2D : MonoBehaviour
 
         isDead = true;
 
+        rb.gravityScale = 0;
+        rb.linearVelocity = Vector2.zero;
+
+        animator.SetBool("Walking", false);
+        animator.SetBool("Running", false);
+        animator.SetBool("Sliding", false);
+        animator.SetBool("IsJumping", false);
+
         animator.SetTrigger("Death");
 
         StartCoroutine(Respawn());
     }
-
     IEnumerator Respawn()
     {
+        rb.gravityScale = 3f;
         rb.linearVelocity = Vector2.zero;
 
         foreach (Collider2D col in colliders)
@@ -815,6 +823,9 @@ public class PlayerController2D : MonoBehaviour
 
         currentHealth = maxHealth;
         isDead = false;
+
+        animator.ResetTrigger("Death");
+        animator.Play("Idle");
 
         foreach (Collider2D col in colliders)
         {
